@@ -1,3 +1,4 @@
+import cv2
 import cv2.cv as cv
 from datetime import datetime
 import time
@@ -7,7 +8,7 @@ class MotionDetectorAdaptative():
     def onChange(self, val):  # callback when the user change the detection threshold
         self.threshold = val
 
-    def __init__(self, threshold=25, doRecord=False, showWindows=True, onDetectCallback=None):
+    def __init__(self, threshold=25, doRecord=False, showWindows=True, onDetectCallback=None, captureURL=None):
         self.writer = None
         self.font = None
         self.doRecord = doRecord  # Either or not record the moving object
@@ -15,8 +16,15 @@ class MotionDetectorAdaptative():
         self.onDetectCallback = onDetectCallback  # On detect callback
         self.frame = None
 
-        self.capture = cv.CaptureFromCAM(0)
+        if captureURL is None:
+            self.capture = cv.CaptureFromCAM(0)
+        elif str(captureURL).isdigit():
+            self.capture = cv.CaptureFromCAM(captureURL)
+        else:
+            self.capture = cv.CaptureFromFile(captureURL)
+
         self.frame = cv.QueryFrame(self.capture)  # Take a frame to init recorder
+
         if doRecord:
             self.initRecorder()
 
