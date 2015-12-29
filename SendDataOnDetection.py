@@ -1,9 +1,9 @@
-from threading import Timer, Thread
+from threading import Timer
 
 import requests
 
 from MotionDetectorContours import MotionDetectorAdaptative
-
+from SendPostAsync import SendPostAsync
 
 relay_address = "http://192.168.1.50"
 timer_delay = 2
@@ -11,20 +11,15 @@ timer = None
 
 
 def send_post(to):
-    try:
-        Thread(target=requests.post, args=(to, )).start()
-    except:
-        print "Oops! ConnectionError"
+    SendPostAsync(target=requests.post, args=(to,)).start()
 
 
 def set_low(_relay_address):
     send_post(_relay_address + "/gpio0/low")
-    print(_relay_address + "/gpio0/low")
 
 
 def set_high(_relay_address):
     send_post(_relay_address + "/gpio0/high")
-    print(_relay_address + "/gpio0/high")
 
 
 def on_detect():
@@ -38,7 +33,8 @@ def on_detect():
     timer.start()
 
 
-detect = MotionDetectorAdaptative(threshold=10, onDetectCallback=on_detect)
+detect = MotionDetectorAdaptative(threshold=10, onDetectCallback=on_detect,
+                                  # captureURL="http://192.168.1.100:8080/video",
+                                  captureURL=0
+                                  )
 detect.run()
-
-
