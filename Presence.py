@@ -1,15 +1,11 @@
-import timeit
+import time
+from datetime import datetime
 
 import cv2
 import numpy as np
 from PIL import Image
-from datetime import time, datetime
 from sklearn import metrics
-from sklearn.linear_model import SGDClassifier, LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import BernoulliRBM
-from sklearn.svm import SVC
-import time
+from sklearn.linear_model import LogisticRegression
 
 from images_to_ndim_vector import image_to_ndim_vector
 from images_to_ndim_vector import images_to_ndim_vector
@@ -31,7 +27,7 @@ y = dataset[:, -1]
 unique_y = np.unique(y)
 
 
-model = LogisticRegression(max_iter=8, n_jobs=-1, verbose=1)  # Best match
+model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
 # model = SVC(kernel="rbf", max_iter=-1, verbose=1)
 # model = SVC(kernel="poly", max_iter=-1, verbose=1, degree=2)
 # model = SVC(kernel="linear", verbose=1)  # Best match
