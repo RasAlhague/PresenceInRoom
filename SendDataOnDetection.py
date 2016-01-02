@@ -17,11 +17,11 @@ def send_post(to):
 
 
 def set_low(_relay_address):
-    send_post(_relay_address + "/gpio0/low")
+    send_post(_relay_address + "/gpio/0/low")
 
 
 def set_high(_relay_address):
-    send_post(_relay_address + "/gpio0/high")
+    send_post(_relay_address + "/gpio/0/high")
 
 
 def on_detect():
