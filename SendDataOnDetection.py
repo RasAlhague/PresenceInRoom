@@ -6,6 +6,8 @@ from MotionDetectorContours import MotionDetectorAdaptative
 from SendPostAsync import SendPostAsync
 
 relay_address = "http://192.168.1.50"
+captureURL = 0
+# captureURL = "http://192.168.1.100:8080/video"
 timer_delay = 2
 timer = None
 
@@ -33,8 +35,5 @@ def on_detect():
     timer.start()
 
 
-detect = MotionDetectorAdaptative(threshold=10, onDetectCallback=on_detect,
-                                  # captureURL="http://192.168.1.100:8080/video",
-                                  captureURL=0
-                                  )
+detect = MotionDetectorAdaptative(threshold=10, onDetectCallback=on_detect, captureURL=captureURL)
 detect.run()
