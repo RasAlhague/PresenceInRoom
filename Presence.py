@@ -1,10 +1,8 @@
-import time
 from datetime import datetime
 
 import cv2
 import numpy as np
 from PIL import Image
-from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 
 from images_to_ndim_vector import image_to_ndim_vector
@@ -25,7 +23,6 @@ X = dataset[:, 0:-1]
 y = dataset[:, -1]
 
 unique_y = np.unique(y)
-
 
 model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
 # model = SVC(kernel="rbf", max_iter=-1, verbose=1)
@@ -52,6 +49,41 @@ predicted = model.predict(X)
 # summarize the fit of the model
 print(metrics.classification_report(expected, predicted))
 print(metrics.confusion_matrix(expected, predicted))
+
+# from keras.models import Sequential
+# from keras.layers.core import Dense, Dropout, Activation
+# from keras.optimizers import RMSprop
+# from keras.utils import np_utils
+#
+# batch_size = 128
+# nb_classes = 2
+# nb_epoch = 3
+#
+# # convert class vectors to binary class matrices
+# Y_train = np_utils.to_categorical(y, nb_classes)
+#
+# model = Sequential()
+# model.add(Dense(512, input_shape=(10560,)))
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+# model.add(Dense(512))
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+# model.add(Dense(2))
+# model.add(Activation('softmax'))
+#
+# rms = RMSprop()
+# model.compile(loss='categorical_crossentropy', optimizer=rms)
+#
+# model.fit(X, Y_train,
+#           batch_size=batch_size, nb_epoch=nb_epoch,
+#           show_accuracy=True, verbose=2,
+#           validation_data=(X, Y_train))
+# score = model.evaluate(X, Y_train, show_accuracy=True, verbose=0)
+# print('Test score:', score[0])
+# print('Test accuracy:', score[1])
+
+
 
 # cap = cv2.VideoCapture('http://127.0.0.1:8080/web.mjpg')
 cap = cv2.VideoCapture(0)
@@ -89,7 +121,6 @@ while True:
     if key == ord('1'):
         # model.partial_fit(ndim_vector, [1], classes=unique_y)
         Image.fromarray(rgb_frame).save(presencePath + str(datetime.now().time()) + ".jpg", "JPEG")
-
 
 # When everything done, release the capture
 cap.release()
