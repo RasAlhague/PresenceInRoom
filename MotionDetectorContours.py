@@ -1,14 +1,15 @@
-import cv2
-import cv2.cv as cv
-from datetime import datetime
 import time
+from datetime import datetime
+
+import cv2.cv as cv
 
 
 class MotionDetectorAdaptative():
     def onChange(self, val):  # callback when the user change the detection threshold
-        self.threshold = val
+        self.contourThreshold = val
 
-    def __init__(self, threshold=25, doRecord=False, showWindows=True, onDetectCallback=None, captureURL=None):
+    def __init__(self, contourThreshold=25, doRecord=False, showWindows=True, onDetectCallback=None, captureURL=None,
+                 activationThreshold=50):
         self.writer = None
         self.font = None
         self.doRecord = doRecord  # Either or not record the moving object
@@ -36,13 +37,14 @@ class MotionDetectorAdaptative():
         self.surface = self.frame.width * self.frame.height
         self.currentsurface = 0
         self.currentcontours = None
-        self.threshold = threshold
+        self.contourThreshold = contourThreshold
+        self.activationThreshold = activationThreshold
         self.isRecording = False
         self.trigger_time = 0  # Hold timestamp of the last detection
 
         if showWindows:
             cv.NamedWindow("Image")
-            cv.CreateTrackbar("Detection treshold: ", "Image", self.threshold, 100, self.onChange)
+            cv.CreateTrackbar("Detection treshold: ", "Image", self.contourThreshold, 100, self.onChange)
 
     def initRecorder(self):  # Create the recorder
         codec = cv.CV_FOURCC('M', 'J', 'P', 'G')
@@ -103,7 +105,7 @@ class MotionDetectorAdaptative():
         cv.AbsDiff(curframe, self.previous_frame, self.absdiff_frame)  # moving_average - curframe
 
         cv.CvtColor(self.absdiff_frame, self.gray_frame, cv.CV_RGB2GRAY)  # Convert to gray otherwise can't do threshold
-        cv.Threshold(self.gray_frame, self.gray_frame, 50, 255, cv.CV_THRESH_BINARY)
+        cv.Threshold(self.gray_frame, self.gray_frame, self.activationThreshold, 255, cv.CV_THRESH_BINARY)
 
         cv.Dilate(self.gray_frame, self.gray_frame, None, 15)  # to get object blobs
         cv.Erode(self.gray_frame, self.gray_frame, None, 10)
@@ -123,7 +125,7 @@ class MotionDetectorAdaptative():
         avg = (self.currentsurface * 100) / self.surface  # Calculate the average of contour area on the total size
         self.currentsurface = 0  # Put back the current surface to 0
 
-        if avg > self.threshold:
+        if avg > self.contourThreshold:
             return True
         else:
             return False

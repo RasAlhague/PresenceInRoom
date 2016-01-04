@@ -1,9 +1,11 @@
+import time
 from datetime import datetime
 
 import cv2
 import numpy as np
 from PIL import Image
-from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+from sklearn.svm import SVC
 
 from images_to_ndim_vector import image_to_ndim_vector
 from images_to_ndim_vector import images_to_ndim_vector
@@ -24,10 +26,9 @@ y = dataset[:, -1]
 
 unique_y = np.unique(y)
 
-model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
-# model = SVC(kernel="rbf", max_iter=-1, verbose=1)
-# model = SVC(kernel="poly", max_iter=-1, verbose=1, degree=2)
-# model = SVC(kernel="linear", verbose=1)  # Best match
+# model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
+model = SVC(kernel="rbf", verbose=1, probability=True)
+# model = SVC(kernel="linear", verbose=1, probability=False)  # Best match
 
 # -- Epoch 2000
 # Norm: 4787.94, NNZs: 42240, Bias: -24.217423, T: 1384000, Avg. loss: 367011.945610
@@ -101,11 +102,13 @@ while True:
     ndim_vector = image_to_ndim_vector(rgb_frame, imageSize)
 
     # predicted = model.predict_classes(ndim_vector, batch_size=64)
-    predicted = model.predict(ndim_vector)
-    if predicted[0] == 0:
-        cv2.putText(bgr_frame, "0", (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 2, 255)
-    if predicted[0] == 1:
-        cv2.putText(bgr_frame, "1", (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+    # predicted = model.predict(ndim_vector)
+    predicted = model._predict_proba(ndim_vector)
+    print predicted
+    # if predicted[0] == 0:
+    #     cv2.putText(bgr_frame, "0", (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 2, 255)
+    # if predicted[0] == 1:
+    #     cv2.putText(bgr_frame, "1", (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
     # Display the resulting frame
     cv2.imshow('frame', bgr_frame)

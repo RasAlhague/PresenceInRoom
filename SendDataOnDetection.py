@@ -6,8 +6,9 @@ from MotionDetectorContours import MotionDetectorAdaptative
 from SendPostAsync import SendPostAsync
 
 relay_address = "http://192.168.1.50"
-captureURL = 0
+# captureURL = 0
 # captureURL = "http://192.168.1.100:8080/video"
+captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=0.sdp?real_stream--rtp-caching=100"
 timer_delay = 2
 timer = None
 
@@ -35,5 +36,6 @@ def on_detect():
     timer.start()
 
 
-detect = MotionDetectorAdaptative(threshold=10, onDetectCallback=on_detect, captureURL=captureURL)
+detect = MotionDetectorAdaptative(contourThreshold=10, onDetectCallback=on_detect, captureURL=captureURL,
+                                  activationThreshold=25)
 detect.run()
