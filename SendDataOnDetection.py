@@ -14,6 +14,8 @@ captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=0.sd
 # low q
 captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=1.sdp?real_stream--rtp-caching=100"
 
+gpio_number = 6
+
 timer_delay = 2
 timer = None
 
@@ -23,11 +25,11 @@ def send_post(to):
 
 
 def set_low(_relay_address):
-    send_post(_relay_address + "/gpio/0/low")
+    send_post(_relay_address + "/gpio/" + str(gpio_number) + "/low")
 
 
 def set_high(_relay_address):
-    send_post(_relay_address + "/gpio/0/high")
+    send_post(_relay_address + "/gpio/" + str(gpio_number) + "/high")
 
 
 def on_detect():
@@ -41,6 +43,6 @@ def on_detect():
     timer.start()
 
 
-detect = MotionDetectorAdaptative(contourThreshold=10, onDetectCallback=on_detect, captureURL=captureURL,
+detect = MotionDetectorAdaptative(contourThreshold=5, onDetectCallback=on_detect, captureURL=captureURL,
                                   activationThreshold=25, showWindows=True)
 detect.run()
