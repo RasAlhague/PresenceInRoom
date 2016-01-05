@@ -12,6 +12,6 @@ class SendPostAsync(Thread):
     def run(self):
         try:
             print("Sending post to " + self.args[0])
-            requests.post(self.args, self.kwargs)
+            requests.post(self.args[0], self.kwargs)
         except Exception as e:
             print e.message
