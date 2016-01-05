@@ -5,7 +5,7 @@ import requests
 from MotionDetectorContours import MotionDetectorAdaptative
 from SendPostAsync import SendPostAsync
 
-relay_address = "http://192.168.1.50"
+relay_address = "http://192.168.1.52"
 # captureURL = 0
 # captureURL = "http://192.168.1.100:8080/video"
 
