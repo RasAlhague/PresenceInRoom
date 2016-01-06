@@ -6,9 +6,10 @@ import cv2.cv as cv
 
 class MotionDetectorAdaptative():
     def onChange(self, val):  # callback when the user change the detection threshold
-        self.contourThreshold = val
+        self.detectionThreshold = val
 
-    def __init__(self, contourThreshold=25, doRecord=False, showWindows=True, onDetectCallback=None, captureURL=None,
+    def __init__(self, detectionThreshold=25, ignoreThresholdBiggerThan=80, doRecord=False, showWindows=True,
+                 onDetectCallback=None, captureURL=None,
                  activationThreshold=50):
         self.writer = None
         self.font = None
@@ -37,14 +38,15 @@ class MotionDetectorAdaptative():
         self.surface = self.frame.width * self.frame.height
         self.currentsurface = 0
         self.currentcontours = None
-        self.contourThreshold = contourThreshold
+        self.detectionThreshold = detectionThreshold
         self.activationThreshold = activationThreshold
+        self.ignoreThresholdBiggerThan = ignoreThresholdBiggerThan
         self.isRecording = False
         self.trigger_time = 0  # Hold timestamp of the last detection
 
         if showWindows:
             cv.NamedWindow("Image")
-            cv.CreateTrackbar("Detection treshold: ", "Image", self.contourThreshold, 100, self.onChange)
+            cv.CreateTrackbar("Detection treshold: ", "Image", self.detectionThreshold, 100, self.onChange)
 
     def initRecorder(self):  # Create the recorder
         codec = cv.CV_FOURCC('M', 'J', 'P', 'G')
@@ -63,7 +65,7 @@ class MotionDetectorAdaptative():
             self.processImage(currentframe)  # Process the image
 
             if not self.isRecording:
-                if self.somethingHasMoved():
+                if self.somethingHasMoved(currentframe):
                     self.trigger_time = instant  # Update the trigger_time
                     if instant > started + 10:  # Wait 5 second after the webcam start for luminosity adjusting etc..
                         # print "Something is moving !"
@@ -125,7 +127,9 @@ class MotionDetectorAdaptative():
         avg = (self.currentsurface * 100) / self.surface  # Calculate the average of contour area on the total size
         self.currentsurface = 0  # Put back the current surface to 0
 
-        if avg > self.contourThreshold:
+        print avg
+
+        if self.detectionThreshold < avg < self.ignoreThresholdBiggerThan:
             return True
         else:
             return False
