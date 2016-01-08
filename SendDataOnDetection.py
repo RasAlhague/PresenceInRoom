@@ -7,16 +7,16 @@ from SendPostAsync import SendPostAsync
 
 relay_address = "http://192.168.1.52"
 
-# 1 = high; 0 = low
+# 1 = low; 0 = high
 quality = 1
 captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" + \
              str(quality) + \
-             ".sdp?real_stream--rtp-caching=100"
+             ".sdp?real_stream--rtp-caching=10"
 
 gpio_number = 6
 
-timer_delay = 2
 timer = None
+timer_delay = 3
 
 after_low_timer = None
 after_low_timer_delay = 3
@@ -54,10 +54,11 @@ def on_detect():
         timer.start()
 
 
-detect = MotionDetectorAdaptative(detectionThreshold=20,
-                                  ignoreThresholdBiggerThan=70,
+detect = MotionDetectorAdaptative(detectionThreshold=5,
+                                  runningAvgAlpha=0.01,
+                                  ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
-                                  activationThreshold=20,
+                                  activationThreshold=40,
                                   showWindows=True)
 detect.run()
