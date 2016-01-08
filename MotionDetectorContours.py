@@ -8,8 +8,13 @@ class MotionDetectorAdaptative():
     def onChange(self, val):  # callback when the user change the detection threshold
         self.detectionThreshold = val
 
-    def __init__(self, detectionThreshold=25, ignoreThresholdBiggerThan=80, doRecord=False, showWindows=True,
-                 onDetectCallback=None, captureURL=None,
+    def __init__(self, detectionThreshold=25,
+                 runningAvgAlpha=0.01,
+                 ignoreThresholdBiggerThan=80,
+                 doRecord=False,
+                 showWindows=True,
+                 onDetectCallback=None,
+                 captureURL=None,
                  activationThreshold=50):
         self.writer = None
         self.font = None
@@ -40,6 +45,7 @@ class MotionDetectorAdaptative():
         self.currentcontours = None
         self.detectionThreshold = detectionThreshold
         self.activationThreshold = activationThreshold
+        self.runningAvgAlpha = runningAvgAlpha
         self.ignoreThresholdBiggerThan = ignoreThresholdBiggerThan
         self.isRecording = False
         self.trigger_time = 0  # Hold timestamp of the last detection
@@ -57,17 +63,28 @@ class MotionDetectorAdaptative():
 
     def run(self):
         started = time.time()
+        adjustingTime = 0
         while True:
-
             currentframe = cv.QueryFrame(self.capture)
             instant = time.time()  # Get timestamp o the frame
 
             self.processImage(currentframe)  # Process the image
 
+            contourSurface = self.calculateContourSurface()
+            # Adopt to light flashes and big changes
+            if contourSurface > self.ignoreThresholdBiggerThan:
+                adjustingTime = time.time() + 1
+                started = time.time() - 4
+                # cv.RunningAvg(currentframe, self.average_frame, 1)
+
+            if instant < adjustingTime:
+                print 'Adjusting'
+                cv.RunningAvg(currentframe, self.average_frame, 0.4)
+
             if not self.isRecording:
-                if self.somethingHasMoved():
+                if self.somethingHasMoved(contourSurface):
                     self.trigger_time = instant  # Update the trigger_time
-                    if instant > started + 10:  # Wait 5 second after the webcam start for luminosity adjusting etc..
+                    if instant > started + 5:  # Wait 5 second after the webcam start for luminosity adjusting etc..
                         # print "Something is moving !"
 
                         if self.onDetectCallback is not None:
@@ -100,39 +117,67 @@ class MotionDetectorAdaptative():
             self.previous_frame = cv.CloneImage(curframe)
             cv.Convert(curframe, self.average_frame)  # Should convert because after runningavg take 32F pictures
         else:
-            cv.RunningAvg(curframe, self.average_frame, 0.01)  # Compute the average
+            cv.RunningAvg(curframe, self.average_frame, self.runningAvgAlpha)  # Compute the average
 
         cv.Convert(self.average_frame, self.previous_frame)  # Convert back to 8U frame
 
+        if self.show:
+            cv.ShowImage("AVG", self.previous_frame)
+
         cv.AbsDiff(curframe, self.previous_frame, self.absdiff_frame)  # moving_average - curframe
 
+        if self.show:
+            cv.ShowImage("AbsDiff", self.absdiff_frame)
+
         cv.CvtColor(self.absdiff_frame, self.gray_frame, cv.CV_RGB2GRAY)  # Convert to gray otherwise can't do threshold
+
+        if self.show:
+            cv.ShowImage("gray_frame", self.gray_frame)
+
         cv.Threshold(self.gray_frame, self.gray_frame, self.activationThreshold, 255, cv.CV_THRESH_BINARY)
 
+        if self.show:
+            cv.ShowImage("Threshold", self.gray_frame)
+
         cv.Dilate(self.gray_frame, self.gray_frame, None, 15)  # to get object blobs
+
+        if self.show:
+            cv.ShowImage("Dilate", self.gray_frame)
+
         cv.Erode(self.gray_frame, self.gray_frame, None, 10)
 
-    def somethingHasMoved(self):
+        if self.show:
+            cv.ShowImage("Erode", self.gray_frame)
 
+    def somethingHasMoved(self, contourSurface):
+        if self.detectionThreshold < contourSurface < self.ignoreThresholdBiggerThan:
+            return True
+        else:
+            return False
+
+    def calculateContourSurface(self):
         # Find contours
         storage = cv.CreateMemStorage(0)
         contours = cv.FindContours(self.gray_frame, storage, cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
 
         self.currentcontours = contours  # Save contours
+        wholeContourSurface = 0
 
         while contours:  # For all contours compute the area
-            self.currentsurface += cv.ContourArea(contours)
+            contourArea = cv.ContourArea(contours)
+            avg = (contourArea * 100) / self.surface
+            wholeContourSurface += contourArea
+            if avg > self.detectionThreshold:
+                self.currentsurface += contourArea
             contours = contours.h_next()
 
         avg = (self.currentsurface * 100) / self.surface  # Calculate the average of contour area on the total size
+        wholeAvg = (wholeContourSurface * 100) / self.surface
         self.currentsurface = 0  # Put back the current surface to 0
 
-        print avg
+        print avg, "\t", wholeAvg
 
-        if self.detectionThreshold < avg < self.ignoreThresholdBiggerThan:
-            return True
-        else:
-            return False
+        return avg
 
 
 if __name__ == "__main__":
