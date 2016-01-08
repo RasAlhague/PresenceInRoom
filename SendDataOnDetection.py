@@ -60,5 +60,5 @@ detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
                                   activationThreshold=50,
-                                  showWindows=True)
+                                  showWindows=False)
 detect.run()
