@@ -11,7 +11,7 @@ relay_address = "http://192.168.1.52"
 quality = 1
 captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" + \
              str(quality) + \
-             ".sdp?real_stream--rtp-caching=10"
+             ".sdp?real_stream--rtp-caching=100"
 
 gpio_number = 6
 
@@ -54,11 +54,11 @@ def on_detect():
         timer.start()
 
 
-detect = MotionDetectorAdaptative(detectionThreshold=5,
+detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   runningAvgAlpha=0.01,
                                   ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
-                                  activationThreshold=40,
+                                  activationThreshold=50,
                                   showWindows=True)
 detect.run()
