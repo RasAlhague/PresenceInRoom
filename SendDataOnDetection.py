@@ -1,3 +1,4 @@
+import platform
 from threading import Timer
 
 import requests
@@ -55,10 +56,10 @@ def on_detect():
 
 
 detect = MotionDetectorAdaptative(detectionThreshold=6,
-                                  runningAvgAlpha=0.01,
+                                  runningAvgAlpha=0.03,
                                   ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
-                                  activationThreshold=50,
-                                  showWindows=False)
+                                  activationThreshold=30,
+                                  showWindows=True if platform.system()[4] is not "armv7l" else False)
 detect.run()
