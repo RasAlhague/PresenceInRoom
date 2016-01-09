@@ -64,5 +64,5 @@ detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
                                   activationThreshold=30,
-                                  showWindows=True if platform.system()[4] is not "armv7l" else False)
+                                  showWindows=True if platform.uname()[4] is not "armv7l" else False)
 detect.run()
