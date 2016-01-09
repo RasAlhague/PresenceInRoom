@@ -141,13 +141,13 @@ class MotionDetectorAdaptative():
 
         cv.Dilate(self.gray_frame, self.gray_frame, None, 15)  # to get object blobs
 
-        # if self.show:
-        #     cv.ShowImage("Dilate", self.gray_frame)
-        #
-        # cv.Erode(self.gray_frame, self.gray_frame, None, 10)
-        #
-        # if self.show:
-        #     cv.ShowImage("Erode", self.gray_frame)
+        if self.show:
+            cv.ShowImage("Dilate", self.gray_frame)
+
+        cv.Erode(self.gray_frame, self.gray_frame, None, 10)
+
+        if self.show:
+            cv.ShowImage("Erode", self.gray_frame)
 
     def somethingHasMoved(self, contourSurface):
         if self.detectionThreshold < contourSurface < self.ignoreThresholdBiggerThan:
