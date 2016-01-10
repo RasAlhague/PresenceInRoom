@@ -16,7 +16,8 @@ class MotionDetectorAdaptative():
                  showWindows=True,
                  onDetectCallback=None,
                  captureURL=0,
-                 activationThreshold=50):
+                 activationThreshold=50,
+                 resolutionDivider=1):
         self.writer = None
         self.font = None
         self.doRecord = doRecord  # Either or not record the moving object
@@ -36,7 +37,10 @@ class MotionDetectorAdaptative():
         self.absdiff_frame = None
         self.previous_frame = None
 
-        self.surface = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH) * self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.resolutionDivider = resolutionDivider
+        self.width = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
+        self.height = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.surface = (self.width / resolutionDivider) * (self.height / resolutionDivider)
         self.currentsurface = 0
         self.currentcontours = None
         self.detectionThreshold = detectionThreshold
@@ -64,6 +68,8 @@ class MotionDetectorAdaptative():
             ret, currentframe = self.cap.read()
             instant = time.time()  # Get timestamp o the frame
 
+            currentframe = cv2.resize(currentframe, (int(self.width / self.resolutionDivider),
+                                                     int(self.height / self.resolutionDivider)))
             self.processImage(currentframe)  # Process the image
 
             contourSurface = self.calculateContourSurface()

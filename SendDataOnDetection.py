@@ -22,6 +22,7 @@ timer_delay = 3
 after_low_timer = None
 after_low_timer_delay = 3
 
+platform_architecture = platform.uname()[4]
 
 def pass_f():
     print '\t\tReady to High!'
@@ -64,5 +65,6 @@ detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
                                   activationThreshold=30,
-                                  showWindows=True if platform.uname()[4] != "armv7l" else False)
+                                  showWindows=False if platform_architecture == "armv7l" else True,
+                                  resolutionDivider=2 if platform_architecture == "armv7l" else 1)
 detect.run()
