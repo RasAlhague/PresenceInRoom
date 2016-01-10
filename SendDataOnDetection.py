@@ -59,6 +59,7 @@ def on_detect():
         timer.start()
 
 
+# platform_architecture == "armv7l"
 detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   runningAvgAlpha=0.03,
                                   ignoreThresholdBiggerThan=60,
@@ -66,5 +67,7 @@ detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   captureURL=captureURL,
                                   activationThreshold=30,
                                   showWindows=False if platform_architecture == "armv7l" else True,
-                                  resolutionDivider=2 if platform_architecture == "armv7l" else 1)
+                                  resolutionDivider=2 if platform_architecture == "armv7l" else 2,
+                                  dilateIter=5 if platform_architecture == "armv7l" else 15,
+                                  erodeIter=1 if platform_architecture == "armv7l" else 3)
 detect.run()

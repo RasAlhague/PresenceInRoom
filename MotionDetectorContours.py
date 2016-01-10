@@ -17,7 +17,9 @@ class MotionDetectorAdaptative():
                  onDetectCallback=None,
                  captureURL=0,
                  activationThreshold=50,
-                 resolutionDivider=1):
+                 resolutionDivider=1,
+                 dilateIter=15,
+                 erodeIter=5):
         self.writer = None
         self.font = None
         self.doRecord = doRecord  # Either or not record the moving object
@@ -38,6 +40,8 @@ class MotionDetectorAdaptative():
         self.previous_frame = None
 
         self.resolutionDivider = resolutionDivider
+        self.dilateIter = dilateIter
+        self.erodeIter = erodeIter
         self.width = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
         self.height = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
         self.surface = (self.width / resolutionDivider) * (self.height / resolutionDivider)
@@ -138,12 +142,12 @@ class MotionDetectorAdaptative():
         if self.show:
             cv2.imshow("Threshold", self.gray_frame)
 
-        self.gray_frame = cv2.dilate(self.gray_frame, None, iterations=15)  # to get object blobs
+        self.gray_frame = cv2.dilate(self.gray_frame, None, iterations=5)  # to get object blobs
 
         if self.show:
             cv2.imshow("Dilate", self.gray_frame)
 
-        self.gray_frame = cv2.erode(self.gray_frame, None, iterations=10)
+        self.gray_frame = cv2.erode(self.gray_frame, None, iterations=3)
 
         if self.show:
             cv2.imshow("Erode", self.gray_frame)
