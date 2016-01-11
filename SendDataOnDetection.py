@@ -51,7 +51,7 @@ def on_detect():
     if (after_low_timer is None) or (not after_low_timer.isAlive()):
         if timer is None or not timer.isAlive():
             set_high(relay_address)
-            detect.runningAvgAlpha = 0.01  # slowdown to better static human position processing
+            detect.runningAvgAlpha = 0.005  # slowdown to better static human position processing
         else:
             timer.cancel()
 
