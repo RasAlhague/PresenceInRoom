@@ -24,6 +24,9 @@ after_low_timer_delay = 3
 
 platform_architecture = platform.uname()[4]
 
+running_avg_alpha = 0.03
+slow_running_avg_alpha = 0.005
+
 def pass_f():
     print '\t\tReady to High!'
 
@@ -39,7 +42,7 @@ def set_low(_relay_address):
     after_low_timer = Timer(after_low_timer_delay, pass_f, ())
     after_low_timer.start()
 
-    detect.runningAvgAlpha = 0.03
+    detect.runningAvgAlpha = running_avg_alpha
 
 
 def set_high(_relay_address):
@@ -51,7 +54,7 @@ def on_detect():
     if (after_low_timer is None) or (not after_low_timer.isAlive()):
         if timer is None or not timer.isAlive():
             set_high(relay_address)
-            detect.runningAvgAlpha = 0.01  # slowdown to better static human position processing
+            detect.runningAvgAlpha = slow_running_avg_alpha  # slowdown to better static human position processing
         else:
             timer.cancel()
 
@@ -59,15 +62,15 @@ def on_detect():
         timer.start()
 
 
-# platform_architecture == "armv7l"
+platform_architecture = "armv7l"
 detect = MotionDetectorAdaptative(detectionThreshold=6,
-                                  runningAvgAlpha=0.03,
+                                  runningAvgAlpha=running_avg_alpha,
                                   ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
                                   captureURL=captureURL,
                                   activationThreshold=30,
                                   showWindows=False if platform_architecture == "armv7l" else True,
-                                  resolutionDivider=2 if platform_architecture == "armv7l" else 2,
+                                  resolutionDivider=2 if platform_architecture == "armv7l" else 1,
                                   dilateIter=5 if platform_architecture == "armv7l" else 15,
                                   erodeIter=1 if platform_architecture == "armv7l" else 3)
 detect.run()
