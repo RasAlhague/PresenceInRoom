@@ -27,13 +27,6 @@ class MotionDetectorAdaptative():
         self.onDetectCallback = onDetectCallback  # On detect callback
         self.frame = None
 
-        self.cap = cv2.VideoCapture(captureURL)
-
-        ret, self.frame = self.cap.read()  # Take a frame to init recorder
-
-        if doRecord:
-            self.initRecorder()
-
         self.gray_frame = None
         self.average_frame = None
         self.absdiff_frame = None
@@ -42,9 +35,6 @@ class MotionDetectorAdaptative():
         self.resolutionDivider = resolutionDivider
         self.dilateIter = dilateIter
         self.erodeIter = erodeIter
-        self.width = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
-        self.height = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-        self.surface = (self.width / resolutionDivider) * (self.height / resolutionDivider)
         self.currentsurface = 0
         self.currentcontours = None
         self.detectionThreshold = detectionThreshold
@@ -53,6 +43,14 @@ class MotionDetectorAdaptative():
         self.ignoreThresholdBiggerThan = ignoreThresholdBiggerThan
         self.isRecording = False
         self.trigger_time = 0  # Hold timestamp of the last detection
+
+        self.cap = cv2.VideoCapture(captureURL)
+        self.width = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
+        self.height = self.cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.surface = (self.width / resolutionDivider) * (self.height / resolutionDivider)
+
+        if doRecord:
+            self.initRecorder()
 
         if showWindows:
             cv2.namedWindow("Image")
