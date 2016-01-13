@@ -68,7 +68,7 @@ else:
 
     # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
     # model = SVC(kernel="rbf", verbose=1, probability=True)
-    model = SVC(kernel="linear", verbose=1, probability=False)  # Best match
+    model = SVC(kernel="linear", verbose=True, probability=True, decision_function_shape='ovr')  # Best match
     # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
 
     t0 = time.time()
@@ -102,8 +102,8 @@ while True:
     ndim_vector = image_to_ndim_vector(rgb_frame, image_size)
 
     predicted = model.predict(ndim_vector)
-    # predicted = model._predict_proba(ndim_vector)
-    print predicted
+    _predict_proba = model._predict_proba(ndim_vector)
+    print predicted, "\t", _predict_proba
     if predicted[0] == 0:
         cv2.putText(bgr_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
     if predicted[0] == 1:
