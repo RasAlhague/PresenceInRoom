@@ -10,7 +10,7 @@ from sklearn import metrics
 from sklearn.externals import joblib
 from sklearn.svm import SVC
 
-from Constants import capture_url
+from Constants import capture_url, show_preview
 from Constants import relay_address, gpio_to_switch
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import image_to_ndim_vector, create_dataset
@@ -118,7 +118,8 @@ while True:
         on_detect()
 
     # Display the resulting frame
-    cv2.imshow('frame', bgr_frame)
+    if show_preview:
+        cv2.imshow('frame', bgr_frame)
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):

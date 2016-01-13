@@ -12,3 +12,4 @@ capture_url = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" +
 gpio_to_switch = 6
 
 platform_architecture = platform.uname()[4]
+show_preview = False if platform_architecture == "armv7l" else True
