@@ -1,0 +1,14 @@
+import platform
+
+relay_address = "http://192.168.1.52"
+
+# 1 = low; 0 = high
+stream_quality = 1
+
+capture_url = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" + \
+              str(stream_quality) + \
+              ".sdp?real_stream--rtp-caching=100"
+
+gpio_to_switch = 6
+
+platform_architecture = platform.uname()[4]
