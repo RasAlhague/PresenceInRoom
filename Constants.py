@@ -13,3 +13,6 @@ gpio_to_switch = 6
 
 platform_architecture = platform.uname()[4]
 show_preview = False if platform_architecture == "armv7l" else True
+
+real_image_size = 352, 288
+image_size_divider = 4 if platform_architecture == "armv7l" else 2

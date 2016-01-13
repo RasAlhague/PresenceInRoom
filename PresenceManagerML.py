@@ -10,7 +10,7 @@ from sklearn import metrics
 from sklearn.externals import joblib
 from sklearn.svm import SVC
 
-from Constants import capture_url, show_preview
+from Constants import capture_url, show_preview, real_image_size, image_size_divider
 from Constants import relay_address, gpio_to_switch
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import image_to_ndim_vector, create_dataset
@@ -60,8 +60,7 @@ learning_set_path = "Learning Set/"
 absence_prefix = "Abs"
 presence_prefix = "Pre"
 
-image_size = 352, 288
-image_size = tuple(size / 2 for size in image_size)
+image_size = tuple(size / image_size_divider for size in real_image_size)
 
 model = None
 
