@@ -70,9 +70,6 @@ y = dataset[:, -1]
 # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
 # model = SVC(kernel="rbf", verbose=1, probability=True)
 model = SVC(kernel="linear", verbose=1, probability=False)  # Best match
-
-# -- Epoch 2000
-# Norm: 4787.94, NNZs: 42240, Bias: -24.217423, T: 1384000, Avg. loss: 367011.945610
 # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
 
 
