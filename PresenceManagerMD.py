@@ -1,20 +1,10 @@
-import platform
 from threading import Timer
 
 import requests
 
+from Constants import relay_address, capture_url, gpio_to_switch, platform_architecture
 from MotionDetectorContours import MotionDetectorAdaptative
 from SendPostAsync import SendPostAsync
-
-relay_address = "http://192.168.1.52"
-
-# 1 = low; 0 = high
-quality = 1
-captureURL = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" + \
-             str(quality) + \
-             ".sdp?real_stream--rtp-caching=100"
-
-gpio_number = 6
 
 timer = None
 timer_delay = 3
@@ -22,10 +12,9 @@ timer_delay = 3
 after_low_timer = None
 after_low_timer_delay = 3
 
-platform_architecture = platform.uname()[4]
-
 running_avg_alpha = 0.03
 slow_running_avg_alpha = 0.005
+
 
 def pass_f():
     print '\t\tReady to High!'
@@ -36,7 +25,7 @@ def send_post(to):
 
 
 def set_low(_relay_address):
-    send_post(_relay_address + "/gpio/" + str(gpio_number) + "/low")
+    send_post(_relay_address + "/gpio/" + str(gpio_to_switch) + "/low")
 
     global after_low_timer
     after_low_timer = Timer(after_low_timer_delay, pass_f, ())
@@ -46,7 +35,7 @@ def set_low(_relay_address):
 
 
 def set_high(_relay_address):
-    send_post(_relay_address + "/gpio/" + str(gpio_number) + "/high")
+    send_post(_relay_address + "/gpio/" + str(gpio_to_switch) + "/high")
 
 
 def on_detect():
@@ -67,7 +56,7 @@ detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   runningAvgAlpha=running_avg_alpha,
                                   ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
-                                  captureURL=captureURL,
+                                  captureURL=capture_url,
                                   activationThreshold=30,
                                   showWindows=False if platform_architecture == "armv7l" else True,
                                   resolutionDivider=2 if platform_architecture == "armv7l" else 1,
