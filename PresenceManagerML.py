@@ -1,3 +1,4 @@
+import sys
 import time
 from datetime import datetime
 from threading import Timer
@@ -5,6 +6,8 @@ from threading import Timer
 import cv2
 import requests
 from PIL import Image
+from sklearn import metrics
+from sklearn.externals import joblib
 from sklearn.svm import SVC
 
 from Constants import capture_url
@@ -60,37 +63,42 @@ presence_prefix = "Pre"
 image_size = 352, 288
 image_size = tuple(size / 2 for size in image_size)
 
-dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size)
+model = None
 
-# dataset = np.load("dataset.npy")
+if "--model-from-file" in sys.argv:
+    model = joblib.load('model.pkl')
+else:
+    dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size)
 
-X = dataset[:, 0:-1]
-y = dataset[:, -1]
+    X = dataset[:, 0:-1]
+    y = dataset[:, -1]
 
-# model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
-# model = SVC(kernel="rbf", verbose=1, probability=True)
-model = SVC(kernel="linear", verbose=1, probability=False)  # Best match
-# model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
+    # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
+    # model = SVC(kernel="rbf", verbose=1, probability=True)
+    model = SVC(kernel="linear", verbose=1, probability=False)  # Best match
+    # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
 
+    t0 = time.time()
+    model.fit(X, y)
+    t1 = time.time()
 
-t0 = time.time()
-model.fit(X, y)
-t1 = time.time()
+    total = t1 - t0
+    print('Fitting time: ' + str(total))
+    print(model)
 
-total = t1 - t0
-print('Fitting time: ' + str(total))
-print(model)
+    # save model
+    joblib.dump(model, 'model.pkl', compress=3)
 
-# make predictions
-# expected = y
-# predicted = model.predict(X)
+    # make predictions
+    expected = y
+    predicted = model.predict(X)
 
-# summarize the fit of the model
-# print(metrics.classification_report(expected, predicted))
-# print(metrics.confusion_matrix(expected, predicted))
+    # summarize the fit of the model
+    print(metrics.classification_report(expected, predicted))
+    print(metrics.confusion_matrix(expected, predicted))
+
 
 cap = cv2.VideoCapture(capture_url)
-
 while True:
     # Capture frame-by-frame
     ret, bgr_frame = cap.read()
