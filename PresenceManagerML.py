@@ -21,7 +21,7 @@ timer = None
 timer_delay = 3
 
 after_low_timer = None
-after_low_timer_delay = 3
+after_low_timer_delay = 0
 
 font = cv2.cv.InitFont(cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 2, 8)
 
@@ -64,10 +64,11 @@ def on_record_mode_change(rm):
 
 
 def opencv_routine():
+    # sys.argv.append("--model-from-file")
     if "--model-from-file" in sys.argv:
         model = joblib.load('model.pkl')
     else:
-        dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size)
+        dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size, img_layers=1)
 
         X = dataset[:, 0:-1]
         y = dataset[:, -1]
@@ -101,10 +102,11 @@ def opencv_routine():
         # Capture frame-by-frame
         ret, bgr_frame = cap.read()
 
-        # Our operations on the frame come here
+        # Choose color space
         rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
         gray_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
-        ndim_vector = image_to_ndim_vector(rgb_frame, image_size)
+        # Convert to row vector
+        ndim_vector = image_to_ndim_vector(gray_frame, image_size)
 
         predicted = model.predict(ndim_vector)
         _predict_proba = model._predict_proba(ndim_vector)
@@ -125,13 +127,13 @@ def opencv_routine():
 
         if key == ord('2') or record_mode == 2:
             Image.fromarray(rgb_frame).save(
-                learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
-                "JPEG")
+                    learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
+                    "JPEG")
 
         if key == ord('1') or record_mode == 1:
             Image.fromarray(rgb_frame).save(
-                learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
-                "JPEG")
+                    learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
+                    "JPEG")
 
     # When everything done, release the capture
     cap.release()
