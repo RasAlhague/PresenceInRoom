@@ -1,11 +1,12 @@
 import sys
 import time
 from datetime import datetime
-from threading import Timer
+from threading import Timer, Thread
 
 import cv2
 import requests
 from PIL import Image
+from flask_restful import Resource
 from sklearn import metrics
 from sklearn.externals import joblib
 from sklearn.svm import SVC
@@ -13,6 +14,7 @@ from sklearn.svm import SVC
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from SendPostAsync import SendPostAsync
+from WebServer import WebServer
 from images_to_ndim_vector import image_to_ndim_vector, create_dataset
 
 timer = None
@@ -56,78 +58,97 @@ def on_detect():
         timer.start()
 
 
+def on_record_mode_change(rm):
+    global record_mode
+    record_mode = rm
+
+
+def opencv_routine():
+    if "--model-from-file" in sys.argv:
+        model = joblib.load('model.pkl')
+    else:
+        dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size)
+
+        X = dataset[:, 0:-1]
+        y = dataset[:, -1]
+
+        # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
+        # model = SVC(kernel="rbf", verbose=1, probability=True)
+        model = SVC(kernel="linear", verbose=True, probability=True, decision_function_shape='ovr')  # Best match
+        # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
+
+        t0 = time.time()
+        model.fit(X, y)
+        t1 = time.time()
+
+        total = t1 - t0
+        print('Fitting time: ' + str(total))
+        print(model)
+
+        # save model
+        joblib.dump(model, 'model.pkl', compress=3)
+
+        # make predictions
+        expected = y
+        predicted = model.predict(X)
+
+        # summarize the fit of the model
+        print(metrics.classification_report(expected, predicted))
+        print(metrics.confusion_matrix(expected, predicted))
+
+    cap = cv2.VideoCapture(capture_url)
+    while True:
+        # Capture frame-by-frame
+        ret, bgr_frame = cap.read()
+
+        # Our operations on the frame come here
+        rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+        gray_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
+        ndim_vector = image_to_ndim_vector(rgb_frame, image_size)
+
+        predicted = model.predict(ndim_vector)
+        _predict_proba = model._predict_proba(ndim_vector)
+        print predicted, "\t", _predict_proba
+        if predicted[0] == 0:
+            cv2.putText(bgr_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+        if predicted[0] == 1:
+            cv2.putText(bgr_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+            on_detect()
+
+        # Display the resulting frame
+        if show_preview:
+            cv2.imshow('frame', bgr_frame)
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
+
+        if key == ord('2') or record_mode == 2:
+            Image.fromarray(rgb_frame).save(
+                learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
+                "JPEG")
+
+        if key == ord('1') or record_mode == 1:
+            Image.fromarray(rgb_frame).save(
+                learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
+                "JPEG")
+
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+class Handler(Resource):
+    def post(self, rm):
+        global record_mode
+        record_mode = rm
+        return {'record_mode': rm}
+
+
 model = None
 
-if "--model-from-file" in sys.argv:
-    model = joblib.load('model.pkl')
-else:
-    dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size)
+opencv_routine = Thread(target=opencv_routine)
+opencv_routine.setDaemon(True)
+opencv_routine.start()
 
-    X = dataset[:, 0:-1]
-    y = dataset[:, -1]
-
-    # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
-    # model = SVC(kernel="rbf", verbose=1, probability=True)
-    model = SVC(kernel="linear", verbose=True, probability=True, decision_function_shape='ovr')  # Best match
-    # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
-
-    t0 = time.time()
-    model.fit(X, y)
-    t1 = time.time()
-
-    total = t1 - t0
-    print('Fitting time: ' + str(total))
-    print(model)
-
-    # save model
-    joblib.dump(model, 'model.pkl', compress=3)
-
-    # make predictions
-    expected = y
-    predicted = model.predict(X)
-
-    # summarize the fit of the model
-    print(metrics.classification_report(expected, predicted))
-    print(metrics.confusion_matrix(expected, predicted))
-
-
-cap = cv2.VideoCapture(capture_url)
-while True:
-    # Capture frame-by-frame
-    ret, bgr_frame = cap.read()
-
-    # Our operations on the frame come here
-    rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
-    gray_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
-    ndim_vector = image_to_ndim_vector(rgb_frame, image_size)
-
-    predicted = model.predict(ndim_vector)
-    _predict_proba = model._predict_proba(ndim_vector)
-    print predicted, "\t", _predict_proba
-    if predicted[0] == 0:
-        cv2.putText(bgr_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
-    if predicted[0] == 1:
-        cv2.putText(bgr_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
-        on_detect()
-
-    # Display the resulting frame
-    if show_preview:
-        cv2.imshow('frame', bgr_frame)
-
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):
-        break
-
-    if key == ord('2'):
-        # model.partial_fit(ndim_vector, [0], classes=unique_y)
-        Image.fromarray(rgb_frame).save(learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
-                                        "JPEG")
-
-    if key == ord('1'):
-        # model.partial_fit(ndim_vector, [1], classes=unique_y)
-        Image.fromarray(rgb_frame).save(learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
-                                        "JPEG")
-
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()
+WebServer().map_post({Handler: "/mode/set/<int:rm>"}).run()

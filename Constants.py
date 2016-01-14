@@ -20,3 +20,5 @@ show_preview = False if platform_architecture == "armv7l" else True
 real_image_size = 352, 288
 image_size_divider = 8
 image_size = tuple(size / image_size_divider for size in real_image_size)
+
+record_mode = 0
