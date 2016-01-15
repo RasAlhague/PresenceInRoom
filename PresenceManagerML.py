@@ -74,9 +74,8 @@ def opencv_routine():
         y = dataset[:, -1]
 
         # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
-        # model = SVC(kernel="rbf", verbose=1, probability=True)
-        model = SVC(kernel="linear", verbose=True, probability=True, decision_function_shape='ovr')  # Best match
-        # model = SGDClassifier(n_iter=2000, verbose=2, n_jobs=-1, warm_start=True)  # nice too
+        # model = SVC(kernel="rbf", C=1, coef0=5, verbose=1, probability=True, decision_function_shape='ovr')
+        model = SVC(kernel="linear", C=1, verbose=True, probability=True, decision_function_shape='ovr')  # Best match
 
         t0 = time.time()
         model.fit(X, y)
@@ -112,14 +111,14 @@ def opencv_routine():
         _predict_proba = model._predict_proba(ndim_vector)
         print predicted, "\t", _predict_proba
         if predicted[0] == 0:
-            cv2.putText(bgr_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+            cv2.putText(gray_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
         if predicted[0] == 1:
-            cv2.putText(bgr_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+            cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
             on_detect()
 
         # Display the resulting frame
         if show_preview:
-            cv2.imshow('frame', bgr_frame)
+            cv2.imshow('frame', gray_frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
