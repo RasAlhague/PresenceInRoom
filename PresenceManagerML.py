@@ -64,6 +64,8 @@ def on_record_mode_change(rm):
 
 
 def opencv_routine():
+    model = None
+
     # sys.argv.append("--model-from-file")
     if "--model-from-file" in sys.argv:
         model = joblib.load('model.pkl')
@@ -145,8 +147,6 @@ class Handler(Resource):
         record_mode = rm
         return {'record_mode': rm}
 
-
-model = None
 
 opencv_routine = Thread(target=opencv_routine)
 opencv_routine.setDaemon(True)

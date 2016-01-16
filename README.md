@@ -1,4 +1,6 @@
 # PresenceInRoom
-Script detects movement using opencv stream and send request to relay
+Script detects movement and send request to relay
 
-I also tried to use ML to detect presence but that was not good idia as I need large training set and have high chance to misspredict
+There are 2 ways to control the relay:
+- PresenceManagerMD - uses motion detection though opencv
+- PresenceManagerML - uses machine learning
