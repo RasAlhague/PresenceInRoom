@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 
 from Constants import *
 from Constants import relay_address, gpio_to_switch
+from DimensionalityReduction import DimensionalityReduction
 from SendPostAsync import SendPostAsync
 from WebServer import WebServer
 from images_to_ndim_vector import image_to_ndim_vector, create_dataset
@@ -75,7 +76,7 @@ def opencv_routine():
         X = dataset[:, 0:-1]
         y = dataset[:, -1]
 
-        # DimensionalityReduction(X, y)
+        DimensionalityReduction(X, y)
 
         # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
         # model = SVC(kernel="rbf", C=1, coef0=5, verbose=1, probability=True, decision_function_shape='ovr')
