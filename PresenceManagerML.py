@@ -75,6 +75,8 @@ def opencv_routine():
         X = dataset[:, 0:-1]
         y = dataset[:, -1]
 
+        # DimensionalityReduction(X, y)
+
         # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
         # model = SVC(kernel="rbf", C=1, coef0=5, verbose=1, probability=True, decision_function_shape='ovr')
         model = SVC(kernel="linear", C=1, verbose=True, probability=True, decision_function_shape='ovr')  # Best match
