@@ -43,9 +43,6 @@ class DimensionalityReduction:
         lda = LinearDiscriminantAnalysis(n_components=1)
         X_r2 = lda.fit_transform(self.X, self.y)
 
-        # Percentage of variance explained for each components
-        print('explained variance ratio for lda: %s' % str(lda.explained_variance_ratio_))
-
         plt.figure()
         for c, i, target_name in zip("rg", [0, 1], ["x", "y"]):
             x_r2 = X_r2[self.y == i, 0]
