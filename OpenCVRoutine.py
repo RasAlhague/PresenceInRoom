@@ -24,26 +24,27 @@ class OpenCVRoutine(Thread):
             ret, bgr_frame = cap.read()
 
             # Choose color space
-            rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
             gray_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
+            equalized_frame = cv2.equalizeHist(gray_frame)
 
-            self.frame_callback(gray_frame)
+            self.frame_callback(equalized_frame)
 
             # Display the resulting frame
             if show_preview:
-                cv2.imshow('frame', gray_frame)
+                cv2.imshow('gray_frame', gray_frame)
+                cv2.imshow('equalization', equalized_frame)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
 
             if key == ord('2') or record_mode == 2:
-                Image.fromarray(rgb_frame).save(
+                Image.fromarray(bgr_frame).save(
                         learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
                         "JPEG")
 
             if key == ord('1') or record_mode == 1:
-                Image.fromarray(rgb_frame).save(
+                Image.fromarray(bgr_frame).save(
                         learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
                         "JPEG")
 

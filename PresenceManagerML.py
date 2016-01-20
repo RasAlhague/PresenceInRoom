@@ -114,10 +114,10 @@ def frame_handler(gray_frame):
 
     if "-nn" in sys.argv:
         # NN predict time: 0.00577807426453
-        ndim_vector = image_to_ndim_vector(gray_frame, divide_image_size(16))
+        ndim_vector = image_to_ndim_vector(gray_frame, nn_image_size)
         ndim_vector = ndim_vector.astype('float32')
         ndim_vector /= 255
-        ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
+        # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
 
         predicted = model.predict_classes(ndim_vector)
         _predict_proba = model.predict(ndim_vector)

@@ -32,11 +32,8 @@ show_preview = False if platform_architecture == "armv7l" else True
 
 real_image_size = 352, 288
 image_size_divider = 8
+nn_image_size_divider = 16
 image_size = tuple(size / image_size_divider for size in real_image_size)
-
-
-def divide_image_size(divider):
-    return tuple(size / divider for size in real_image_size)
-
+nn_image_size = tuple(size / nn_image_size_divider for size in real_image_size)
 
 record_mode = 0
