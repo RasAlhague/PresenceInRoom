@@ -2,14 +2,13 @@ import sys
 import time
 from threading import Timer
 
-import numpy
 import requests
 from flask_restful import Resource
 
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
-from KerasNNModel import conv_model
+from KerasNNModel import train
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
 from WebServer import WebServer
@@ -74,8 +73,7 @@ def init_model():
             if show_preview:
                 DimensionalityReduction(X, y)
 
-            # model = LogisticRegression(max_iter=100, n_jobs=-1, verbose=1)  # Best match
-            # model = SVC(kernel="rbf", C=1, coef0=5, verbose=1, probability=True, decision_function_shape='ovr')
+            # model = LogisticRegression(n_jobs=-1, verbose=1)  # Best match
             model = SVC(kernel="linear", C=1, verbose=True, probability=True,
                         decision_function_shape='ovr')  # Best match
 
@@ -101,11 +99,13 @@ def init_model():
             # return Model(predict=model.predict)
     elif "-nn" in sys.argv:
         if "--model-from-file" in sys.argv:
-            # model = model_from_json(open(nn_model_file_name).read())
-            model = conv_model()
+            from keras.models import model_from_json
+            model = model_from_json(open(nn_model_file_name).read())
             model.load_weights(nn_model_weights)
             return model
             # return Model(predict=model.predict_classes)
+        elif "--model-from-file" not in sys.argv:
+            return train()
 
 
 def frame_handler(gray_frame):
@@ -113,19 +113,20 @@ def frame_handler(gray_frame):
     _predict_proba = None
 
     if "-nn" in sys.argv:
-        # NN Fitting time: 0.00577807426453
+        # NN predict time: 0.00577807426453
         ndim_vector = image_to_ndim_vector(gray_frame, divide_image_size(16))
         ndim_vector = ndim_vector.astype('float32')
         ndim_vector /= 255
-        ndim_vector = numpy.array([[ndim_vector.reshape(22, 18)]])
+        ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
 
         predicted = model.predict_classes(ndim_vector)
         _predict_proba = model.predict(ndim_vector)
     elif "-svm" in sys.argv:
-        # SVM Fitting time: 0.00129914283752
+        # SVM predict time: 0.00129914283752
         ndim_vector = image_to_ndim_vector(gray_frame, image_size)
         predicted = model.predict(ndim_vector)
-        _predict_proba = model._predict_proba(ndim_vector)
+        if model.get_params()['probability']:
+            _predict_proba = model._predict_proba(ndim_vector)
 
     print predicted, "\t", _predict_proba
 

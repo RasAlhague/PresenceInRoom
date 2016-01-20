@@ -20,7 +20,8 @@ def conv_model():
     model = Sequential()
     model.add(Convolution2D(nb_filters, nb_conv, nb_conv,
                             border_mode='valid',
-                            input_shape=(1, image_size[0], image_size[1])))
+                            input_shape=(1, image_size[0], image_size[1])
+                            ))
     model.add(Activation('relu'))
     model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
     model.add(Activation('relu'))
@@ -43,11 +44,11 @@ def conv_model():
 def mlp_model():
     model = Sequential()
 
-    model.add(Dense(input_dim=n_features, output_dim=n_hidden_layer_neurons))
+    model.add(Dense(n_hidden_layer_neurons, input_shape=(n_features,)))
     model.add(Activation('relu'))
     model.add(Dropout(dropout))
     for layer in range(0, nb_hidden_layers):
-        model.add(Dense(output_dim=n_hidden_layer_neurons))
+        model.add(Dense(n_hidden_layer_neurons))
         model.add(Activation('relu'))
         model.add(Dropout(dropout))
     model.add(Dense(output_dim=n_classes))
@@ -60,15 +61,7 @@ def mlp_model():
     return model
 
 
-image_size = divide_image_size(16)
-n_features = image_size[0] * image_size[1]
-n_hidden_layer_neurons = 512
-n_classes = 2
-nb_epoch = 15
-nb_hidden_layers = 3
-dropout = 0.2
-
-if __name__ == '__main__':
+def train():
     dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size, img_layers=1)
 
     X_train = dataset[:, 0:-1]
@@ -80,12 +73,39 @@ if __name__ == '__main__':
     # convert class vectors to binary class matrices
     Y_train = np_utils.to_categorical(Y_train, n_classes)
 
-    model = mlp_model()
-    model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=64, show_accuracy=True,
-              validation_data=(X_train, Y_train))
+    model = conv_model()
+    inpush_shape = (X_train.shape[0], 1, image_size[0], image_size[1])
+    model.fit(X_train.reshape(inpush_shape),
+              Y_train,
+              nb_epoch=nb_epoch,
+              batch_size=64,
+              show_accuracy=True,
+              validation_data=(X_train.reshape(inpush_shape), Y_train),
+              verbose=2)
+    print model.evaluate(X_train.reshape(inpush_shape), Y_train, batch_size=64)
 
-    print model.evaluate(X_train, Y_train, batch_size=64)
+    # for i in range(0, X_train.shape[0]):
+    #     print model.train_on_batch(X_train[i].reshape(1, 1, 22, 18), [Y_train[i]], accuracy=True)
+
+    # model = mlp_model()
+    # model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=64, show_accuracy=True,
+    #           validation_data=(X_train, Y_train))
+    # print model.evaluate(X_train, Y_train, batch_size=64)
 
     json_string = model.to_json()
     open(nn_model_file_name, 'w').write(json_string)
     model.save_weights(nn_model_weights, overwrite=True)
+
+    return model
+
+
+image_size = divide_image_size(16)
+n_features = image_size[0] * image_size[1]
+n_hidden_layer_neurons = n_features * 2  # 512
+n_classes = 2
+nb_epoch = 20
+nb_hidden_layers = 0
+dropout = 0.9
+
+if __name__ == '__main__':
+    train()
