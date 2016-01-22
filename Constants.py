@@ -11,7 +11,7 @@ presence_prefix = "Pre"
 relay_address = "http://192.168.1.52"
 
 timer = None
-timer_delay = 1
+timer_delay = 3
 
 after_low_timer = None
 after_low_timer_delay = 0
@@ -31,9 +31,9 @@ platform_architecture = platform.uname()[4]
 show_preview = False if platform_architecture == "armv7l" else True
 
 real_image_size = 352, 288
-image_size_divider = 8
-nn_image_size_divider = 16
-image_size = tuple(size / image_size_divider for size in real_image_size)
-nn_image_size = tuple(size / nn_image_size_divider for size in real_image_size)
-
-record_mode = 0
+image_scale_factor = (0.125, 0.125)
+nn_image_scale_factor = (0.06, 0.06)
+image_size = (int(round(real_image_size[0] * image_scale_factor[0])),
+              int(round(real_image_size[1] * image_scale_factor[1])))
+nn_image_size = (int(round(real_image_size[0] * nn_image_scale_factor[0])),
+                 int(round(real_image_size[1] * nn_image_scale_factor[1])))

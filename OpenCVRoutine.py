@@ -5,6 +5,13 @@ from PIL import Image
 
 from Constants import *
 
+record_mode = 0
+
+
+def set_rm(rm):
+    global record_mode
+    record_mode = rm
+
 
 class OpenCVRoutine(Thread):
     def __init__(self, frame_callback):
@@ -31,7 +38,7 @@ class OpenCVRoutine(Thread):
 
             # Display the resulting frame
             if show_preview:
-                cv2.imshow('gray_frame', gray_frame)
+                # cv2.imshow('gray_frame', gray_frame)
                 cv2.imshow('equalization', equalized_frame)
 
             key = cv2.waitKey(1) & 0xFF

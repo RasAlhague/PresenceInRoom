@@ -3,16 +3,15 @@ import time
 from threading import Timer
 
 import requests
-from flask_restful import Resource
 
+import WebServer
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
 from KerasNNModel import train
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
-from WebServer import WebServer
-from images_to_ndim_vector import image_to_ndim_vector, create_dataset
+from images_to_ndim_vector import create_dataset, prepare_image_for_nn
 
 
 def pass_f():
@@ -105,7 +104,7 @@ def init_model():
             return model
             # return Model(predict=model.predict_classes)
         elif "--model-from-file" not in sys.argv:
-            return train()
+            return train()[0]
 
 
 def frame_handler(gray_frame):
@@ -114,16 +113,14 @@ def frame_handler(gray_frame):
 
     if "-nn" in sys.argv:
         # NN predict time: 0.00577807426453
-        ndim_vector = image_to_ndim_vector(gray_frame, nn_image_size)
-        ndim_vector = ndim_vector.astype('float32')
-        ndim_vector /= 255
+        ndim_vector = prepare_image_for_nn(gray_frame)
         # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
 
         predicted = model.predict_classes(ndim_vector)
         _predict_proba = model.predict(ndim_vector)
     elif "-svm" in sys.argv:
         # SVM predict time: 0.00129914283752
-        ndim_vector = image_to_ndim_vector(gray_frame, image_size)
+        ndim_vector = cv2.resize(gray_frame, (image_size[0], image_size[1])).reshape(1, -1)
         predicted = model.predict(ndim_vector)
         if model.get_params()['probability']:
             _predict_proba = model._predict_proba(ndim_vector)
@@ -136,16 +133,8 @@ def frame_handler(gray_frame):
         cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
         on_detect()
 
-
-class Handler(Resource):
-    def post(self, rm):
-        global record_mode
-        record_mode = rm
-        return {'record_mode': rm}
-
-
 model = init_model()
 
 OpenCVRoutine(frame_callback=frame_handler)
 
-WebServer().map_post({Handler: "/mode/set/<int:rm>"}).run()
+WebServer.run()

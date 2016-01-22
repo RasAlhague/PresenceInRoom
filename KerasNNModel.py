@@ -1,3 +1,6 @@
+import cPickle as pickle
+from multiprocessing import Process
+
 from keras.layers.convolutional import Convolution2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.core import Dense, Activation, Dropout, Flatten
@@ -6,7 +9,7 @@ from keras.optimizers import RMSprop
 from keras.utils import np_utils
 
 from Constants import *
-from images_to_ndim_vector import create_dataset, image_path_to_ndim_vector
+from images_to_ndim_vector import create_dataset, prepare_image_for_nn
 
 
 def conv_model():
@@ -90,30 +93,70 @@ def train():
     model = mlp_model()
     model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=128, show_accuracy=True,
               validation_data=(X_train, Y_train))
-    print model.evaluate(X_train, Y_train, batch_size=128)
+    model_evaluation_score = model.evaluate(X_train, Y_train, batch_size=128)
+    print model_evaluation_score
 
     json_string = model.to_json()
     open(nn_model_file_name, 'w').write(json_string)
     model.save_weights(nn_model_weights, overwrite=True)
 
-    return model
+    return model, model_evaluation_score
 
 
 n_features = nn_image_size[0] * nn_image_size[1]
-n_hidden_layer_neurons = n_features * 3
+n_hidden_layer_neurons = n_features * 4
 n_classes = 2
-nb_epoch = 100
+nb_epoch = 50
 nb_hidden_layers = 0
 dropout = 0.2
 
 if __name__ == '__main__':
-    test_img = image_path_to_ndim_vector('test.jpg', nn_image_size)
-    test_img = test_img.astype('float32')
-    test_img /= 255
-    result = []
-    for i in range(1, 20):
-        dropout = i / 20.
-        model = train()
-        test_im_prediction = model.predict(test_img)
-        result.append(dict(dropout=dropout, test_im_prediction=test_im_prediction))
-        # Process(target=test, args=(i, )).start()
+    def plot_result():
+        import matplotlib.pyplot as plt
+        result_file = open('result.dump')
+        if result_file:
+            result = pickle.load(result_file)
+
+            result_chunks = [result[i:i + 19] for i in xrange(0, len(result), 19)]
+
+            for chunk in result_chunks:
+                plt.figure()
+                plt.title(chunk[0]['n_hidden_layer_neurons'])
+
+                i_dropout = [i['dropout'] for i in chunk]
+                i_model_evaluation_score = [i['model_evaluation_score'] for i in chunk]
+                i_test_im_prediction = [i['test_im_prediction'][0][1] for i in chunk]
+                i_test_im_prediction2 = [i['test_im_prediction2'][0][1] for i in chunk]
+
+                plt.plot(i_dropout, i_model_evaluation_score)
+                plt.plot(i_dropout, i_test_im_prediction)
+                plt.plot(i_dropout, i_test_im_prediction2)
+            plt.xlabel('dropout')
+            plt.ylabel('model_evaluation_score')
+            plt.show()
+
+
+    Process(target=plot_result).start()
+
+    if False:
+        test_img = prepare_image_for_nn(None, 'test.jpg')
+        test_img2 = prepare_image_for_nn(None, 'Abs_22:20:39.317447.jpg')
+        result = []
+        for n in range(1, 7):
+            n_hidden_layer_neurons = n_features * n
+            for i in range(1, 20):
+                dropout = i / 20.
+                model, model_evaluation_score = train()
+                test_im_prediction = model.predict(test_img)
+                test_im_prediction2 = model.predict(test_img2)
+
+                result.append(dict(n_hidden_layer_neurons=n_hidden_layer_neurons,
+                                   nb_epoch=nb_epoch,
+                                   n_features=n_features,
+                                   nn_image_size=nn_image_size,
+                                   nb_hidden_layers=nb_hidden_layers,
+                                   dropout=dropout,
+                                   test_im_prediction=test_im_prediction,
+                                   test_im_prediction2=test_im_prediction2,
+                                   model_evaluation_score=model_evaluation_score))
+                pickle.dump(result, open('result.dump', 'wb'))

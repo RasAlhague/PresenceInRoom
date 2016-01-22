@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from Constants import nn_image_scale_factor
+
 
 def create_dataset(images_folder, prefix_to_label, image_size, img_layers=3):
     i = 0
@@ -14,11 +16,11 @@ def create_dataset(images_folder, prefix_to_label, image_size, img_layers=3):
     for file in images_list:
         file_prefix = file.partition("_")[0]
         if file_prefix in prefix_to_label:
-            im = Image.open(images_folder + file)
-            im.thumbnail(image_size, Image.ANTIALIAS)
+            im = np.array(Image.open(images_folder + file))
             if img_layers == 1:
-                im = cv2.cvtColor(np.array(im), cv2.COLOR_BGR2GRAY)
-            cv2.equalizeHist(im, im)
+                im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+            im = cv2.resize(im, (image_size[0], image_size[1]))
+            im = cv2.equalizeHist(im)
             ndim_vector[i] = np.append(im, [prefix_to_label[file_prefix]]).reshape(1, -1)
             i += 1
     return ndim_vector
@@ -33,8 +35,17 @@ def image_path_to_ndim_vector(image_path, image_size):
     return np.array(im).reshape(1, -1)
 
 
-def image_to_ndim_vector(im, image_size):
-    im = Image.fromarray(im)
-    im.thumbnail(image_size, Image.ANTIALIAS)
+def prepare_image_for_nn(ndim_array, image_path=None, histogram_eq=True):
+    if image_path:
+        ndim_array = cv2.cvtColor(np.array(Image.open(image_path)), cv2.COLOR_BGR2GRAY)
+    im = cv2.resize(ndim_array, (0, 0), fx=nn_image_scale_factor[0], fy=nn_image_scale_factor[1])
 
-    return np.array(im).reshape(1, -1)
+    # equalization
+    if histogram_eq:
+        im = cv2.equalizeHist(im)
+
+    # normalization
+    im = im.astype('float32')
+    im /= 255
+
+    return im.reshape(1, -1)

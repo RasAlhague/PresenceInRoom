@@ -1,1 +1,57 @@
-{"layers": [{"b_constraint": null, "name": "Dense", "activity_regularizer": null, "W_constraint": null, "input_shape": [396], "init": "glorot_uniform", "activation": "linear", "input_dim": null, "b_regularizer": null, "W_regularizer": null, "output_dim": 1188}, {"beta": 0.1, "activation": "relu", "name": "Activation", "target": 0}, {"p": 0.2, "name": "Dropout"}, {"b_constraint": null, "name": "Dense", "activity_regularizer": null, "W_constraint": null, "init": "glorot_uniform", "activation": "linear", "input_dim": null, "b_regularizer": null, "W_regularizer": null, "output_dim": 2}, {"beta": 0.1, "activation": "softmax", "name": "Activation", "target": 0}], "loss": "categorical_crossentropy", "theano_mode": null, "name": "Sequential", "class_mode": "categorical", "optimizer": {"epsilon": 1e-06, "lr": 0.0010000000474974513, "name": "RMSprop", "rho": 0.8999999761581421}}
+{
+  "layers": [
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "input_shape": [
+        357
+      ],
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1428
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 2
+    },
+    {
+      "beta": 0.1,
+      "activation": "softmax",
+      "name": "Activation",
+      "target": 0
+    }
+  ],
+  "loss": "categorical_crossentropy",
+  "theano_mode": null,
+  "name": "Sequential",
+  "class_mode": "categorical",
+  "optimizer": {
+    "epsilon": 1e-06,
+    "lr": 0.0010000000474974513,
+    "name": "RMSprop",
+    "rho": 0.8999999761581421
+  }
+}

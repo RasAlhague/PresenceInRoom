@@ -1,16 +1,14 @@
 from flask import Flask
-from flask_restful import Api
+
+from OpenCVRoutine import set_rm
 
 
-class WebServer:
-    def __init__(self):
-        self.app = Flask(__name__)
-        self.api = Api(self.app)
+def run():
+    app = Flask(__name__)
 
-    def run(self):
-        self.app.run(host='0.0.0.0', debug=False, threaded=True, use_reloader=False)
+    @app.route('/mode/set/<int:rm>', methods=['POST'])
+    def post(rm):
+        set_rm(rm)
+        return {'record_mode': rm}
 
-    def map_post(self, resource_to_url):
-        for key in resource_to_url:
-            self.api.add_resource(key, resource_to_url[key])
-        return self
+    app.run(host='0.0.0.0')
