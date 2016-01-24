@@ -1,16 +1,22 @@
 import sys
 import time
-from threading import Timer
+from multiprocessing import Queue
+from threading import Timer, Thread
 
 import requests
 
 import WebServer
+from ComparisonPlot import ComparisonPlot
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import create_dataset, prepare_image_for_nn
+
+
+def current_milli_time():
+    return int(round(time.time() * 1000))
 
 
 def pass_f():
@@ -145,37 +151,48 @@ def init_model():
 
     elif "--comparison" in sys.argv:
         if "--model-from-file" in sys.argv:
+            global xy_queue, comparison
+            xy_queue = Queue()
+            comparison = ComparisonPlot(xy_queue)
             return dict(svm=load_svm_model(), nn=load_nn_model())
 
 
-def frame_handler(gray_frame):
+def frame_handler(frame_queue):
     predicted = None
     _predict_proba = None
 
-    if "-nn" in sys.argv:
-        predicted, _predict_proba = predict_nn(gray_frame)
+    while True:
+        gray_frame = frame_queue.get()
 
-    elif "-svm" in sys.argv:
-        predicted, _predict_proba = predict_svm(gray_frame)
+        if "-nn" in sys.argv:
+            predicted, _predict_proba = predict_nn(gray_frame)
 
-    elif "--comparison" in sys.argv:
-        predicted, _predict_proba = predict_nn(gray_frame)
-        print 'NN: \t', predicted, "\t", _predict_proba
-        predicted, _predict_proba = predict_svm(gray_frame)
-        print 'SVM:\t', predicted, "\t", _predict_proba
+        elif "-svm" in sys.argv:
+            predicted, _predict_proba = predict_svm(gray_frame)
 
-    print predicted, "\t", _predict_proba
+        elif "--comparison" in sys.argv:
+            predicted_nn, _predict_proba_nn = predict_nn(gray_frame)
+            print 'NN: \t', predicted_nn, "\t", _predict_proba_nn
+            predicted, _predict_proba = predict_svm(gray_frame)
+            print 'SVM:\t', predicted, "\t", _predict_proba
 
-    if predicted[0] == 0:
-        cv2.putText(gray_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
-    if predicted[0] == 1:
-        cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
-        on_detect()
+            xy_queue.put(([current_milli_time(), current_milli_time()],
+                          [_predict_proba_nn[0][1], _predict_proba[0][1]]))
+
+        print predicted, "\t", _predict_proba
+
+        if predicted[0] == 0:
+            cv2.putText(gray_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+        if predicted[0] == 1:
+            cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
+            on_detect()
 
 
 if __name__ == '__main__':
     model = init_model()
+    frame_queue = Queue()
 
     if model:
-        OpenCVRoutine(frame_callback=frame_handler)
+        OpenCVRoutine(frame_queue)
+        Thread(target=frame_handler, args=(frame_queue,)).start()
         WebServer.run()

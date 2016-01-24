@@ -48,12 +48,12 @@ def conv_model():
 def mlp_model():
     model = Sequential()
 
-    model.add(Dense(n_hidden_layer_neurons, input_shape=(n_features,)))
-    model.add(Activation('relu'))
+    model.add(Dense(n_hidden_layer_neurons, input_shape=(n_features,), init=init_method))
+    model.add(Activation(activation_f))
     model.add(Dropout(dropout))
     for layer in range(0, nb_hidden_layers):
-        model.add(Dense(n_hidden_layer_neurons))
-        model.add(Activation('relu'))
+        model.add(Dense(n_hidden_layer_neurons, init=init_method))
+        model.add(Activation(activation_f))
         model.add(Dropout(dropout))
     model.add(Dense(output_dim=n_classes))
     model.add(Activation("softmax"))
@@ -114,11 +114,15 @@ def train(model):
     return model, model_evaluation_score
 
 
+# activation_f = 'relu'
+# activation_f = 'sigmoid'
+activation_f = 'tanh'
+init_method = 'he_normal'
 n_features = nn_image_size[0] * nn_image_size[1]
-n_hidden_layer_neurons = n_features * 3
+n_hidden_layer_neurons = n_features * 5
 n_classes = 2
-nb_epoch = 75
-nb_hidden_layers = 5
+nb_epoch = 150
+nb_hidden_layers = 0
 dropout = 0.2
 
 if __name__ == '__main__':

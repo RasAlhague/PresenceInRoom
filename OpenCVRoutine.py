@@ -1,5 +1,5 @@
 from datetime import datetime
-from threading import Thread
+from multiprocessing import Process
 
 from PIL import Image
 
@@ -13,12 +13,12 @@ def set_rm(rm):
     record_mode = rm
 
 
-class OpenCVRoutine(Thread):
-    def __init__(self, frame_callback):
+class OpenCVRoutine(Process):
+    def __init__(self, frame_queue):
         super(OpenCVRoutine, self).__init__()
 
-        self.frame_callback = frame_callback
-        self.setDaemon(True)
+        self.frame_queue = frame_queue
+
         self.start()
 
     def run(self):
@@ -35,7 +35,7 @@ class OpenCVRoutine(Thread):
                 gray_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
                 equalized_frame = cv2.equalizeHist(gray_frame)
 
-                Thread(target=self.frame_callback, args=(equalized_frame,)).start()
+                self.frame_queue.put(equalized_frame)
 
                 # Display the resulting frame
                 if show_preview:

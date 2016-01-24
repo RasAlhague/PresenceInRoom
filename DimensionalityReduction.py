@@ -27,11 +27,11 @@ class DimensionalityReduction:
         print('explained variance ratio for pca: %s' % str(pca.explained_variance_ratio_))
 
         plt.figure()
-        for c, i, target_name in zip("rgb", [0, 1, 2], ["1", "2", "3"]):
+        for c, i, target_name, s in zip("rgb", [0, 1, 2], ["1", "2", "3"], [10, 2, 20]):
             # x_r = X_r[self.y == i, 0]
             # plt.scatter(X_r[self.y == i, 0], numpy.zeros(x_r.__len__()), c=c, label=target_name)
 
-            plt.scatter(X_r[self.y == i, 0], X_r[self.y == i, 1], c=c, label=target_name)
+            plt.scatter(X_r[self.y == i, 0], X_r[self.y == i, 1], c=c, label=target_name, s=s)
 
         plt.legend()
         plt.title('PCA')
