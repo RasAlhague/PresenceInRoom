@@ -8,7 +8,6 @@ import WebServer
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
-from KerasNNModel import train, mlp_model
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import create_dataset, prepare_image_for_nn
@@ -96,7 +95,6 @@ def predict_nn(gray_frame):
 
 
 def init_model():
-    # sys.argv.append("--model-from-file")
     if "-svm" in sys.argv:
         from sklearn.externals import joblib
         from sklearn.svm import SVC
@@ -139,6 +137,7 @@ def init_model():
             return model
 
     elif "-nn" in sys.argv:
+        from KerasNNModel import train, mlp_model
         if "--model-from-file" in sys.argv:
             return load_nn_model()
         elif "--model-from-file" not in sys.argv:
