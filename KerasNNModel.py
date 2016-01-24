@@ -4,6 +4,7 @@ from multiprocessing import Process
 from keras.layers.convolutional import Convolution2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.core import Dense, Activation, Dropout, Flatten
+from keras.layers.recurrent import LSTM
 from keras.models import Sequential
 from keras.optimizers import RMSprop
 from keras.utils import np_utils
@@ -64,7 +65,18 @@ def mlp_model():
     return model
 
 
-def train():
+def lstm_model():
+    model = Sequential()
+    model.add(LSTM(output_dim=128, input_shape=(n_features, 0)))
+    model.add(Dropout(0.5))
+    model.add(Dense(n_classes))
+    model.add(Activation('softmax'))
+
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+    return model
+
+
+def train(model):
     dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size, img_layers=1)
 
     X_train = dataset[:, 0:-1]
@@ -90,7 +102,6 @@ def train():
     # for i in range(0, X_train.shape[0]):
     #     print model.train_on_batch(X_train[i].reshape(1, 1, 22, 18), [Y_train[i]], accuracy=True)
 
-    model = mlp_model()
     model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=128, show_accuracy=True,
               validation_data=(X_train, Y_train))
     model_evaluation_score = model.evaluate(X_train, Y_train, batch_size=128)
@@ -104,10 +115,10 @@ def train():
 
 
 n_features = nn_image_size[0] * nn_image_size[1]
-n_hidden_layer_neurons = n_features * 4
+n_hidden_layer_neurons = n_features * 3
 n_classes = 2
-nb_epoch = 50
-nb_hidden_layers = 0
+nb_epoch = 75
+nb_hidden_layers = 5
 dropout = 0.2
 
 if __name__ == '__main__':

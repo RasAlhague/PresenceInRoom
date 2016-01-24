@@ -8,7 +8,7 @@ import WebServer
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
-from KerasNNModel import train
+from KerasNNModel import train, mlp_model
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import create_dataset, prepare_image_for_nn
@@ -51,6 +51,50 @@ def on_record_mode_change(rm):
     record_mode = rm
 
 
+def load_svm_model():
+    from sklearn.externals import joblib
+    model = joblib.load('model.pkl')
+    return model
+
+
+def load_nn_model():
+    from keras.models import model_from_json
+    model = model_from_json(open(nn_model_file_name).read())
+    model.load_weights(nn_model_weights)
+    return model
+
+
+def predict_svm(gray_frame):
+    # SVM predict time: 0.00129914283752
+
+    temp_model = model
+    if model.__class__ is dict:
+        temp_model = model['svm']
+
+    ndim_vector = cv2.resize(gray_frame, (image_size[0], image_size[1])).reshape(1, -1)
+    predicted = temp_model.predict(ndim_vector)
+    if temp_model.get_params()['probability']:
+        _predict_proba = temp_model._predict_proba(ndim_vector)
+
+    return predicted, _predict_proba
+
+
+def predict_nn(gray_frame):
+    # NN predict time: 0.00577807426453
+
+    temp_model = model
+    if model.__class__ is dict:
+        temp_model = model['nn']
+
+    ndim_vector = prepare_image_for_nn(gray_frame)
+    # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
+
+    predicted = temp_model.predict_classes(ndim_vector)
+    _predict_proba = temp_model.predict(ndim_vector)
+
+    return predicted, _predict_proba
+
+
 def init_model():
     # sys.argv.append("--model-from-file")
     if "-svm" in sys.argv:
@@ -59,9 +103,7 @@ def init_model():
         from sklearn import metrics
 
         if "--model-from-file" in sys.argv:
-            model = joblib.load('model.pkl')
-            # return Model(predict=model.predict)
-            return model
+            return load_svm_model()
         else:
             dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size,
                                      img_layers=1)
@@ -95,16 +137,16 @@ def init_model():
             print(metrics.classification_report(expected, predicted))
             print(metrics.confusion_matrix(expected, predicted))
             return model
-            # return Model(predict=model.predict)
+
     elif "-nn" in sys.argv:
         if "--model-from-file" in sys.argv:
-            from keras.models import model_from_json
-            model = model_from_json(open(nn_model_file_name).read())
-            model.load_weights(nn_model_weights)
-            return model
-            # return Model(predict=model.predict_classes)
+            return load_nn_model()
         elif "--model-from-file" not in sys.argv:
-            return train()[0]
+            return train(mlp_model())[0]
+
+    elif "--comparison" in sys.argv:
+        if "--model-from-file" in sys.argv:
+            return dict(svm=load_svm_model(), nn=load_nn_model())
 
 
 def frame_handler(gray_frame):
@@ -112,18 +154,16 @@ def frame_handler(gray_frame):
     _predict_proba = None
 
     if "-nn" in sys.argv:
-        # NN predict time: 0.00577807426453
-        ndim_vector = prepare_image_for_nn(gray_frame)
-        # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
+        predicted, _predict_proba = predict_nn(gray_frame)
 
-        predicted = model.predict_classes(ndim_vector)
-        _predict_proba = model.predict(ndim_vector)
     elif "-svm" in sys.argv:
-        # SVM predict time: 0.00129914283752
-        ndim_vector = cv2.resize(gray_frame, (image_size[0], image_size[1])).reshape(1, -1)
-        predicted = model.predict(ndim_vector)
-        if model.get_params()['probability']:
-            _predict_proba = model._predict_proba(ndim_vector)
+        predicted, _predict_proba = predict_svm(gray_frame)
+
+    elif "--comparison" in sys.argv:
+        predicted, _predict_proba = predict_nn(gray_frame)
+        print 'NN: \t', predicted, "\t", _predict_proba
+        predicted, _predict_proba = predict_svm(gray_frame)
+        print 'SVM:\t', predicted, "\t", _predict_proba
 
     print predicted, "\t", _predict_proba
 
@@ -133,8 +173,10 @@ def frame_handler(gray_frame):
         cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
         on_detect()
 
-model = init_model()
 
-OpenCVRoutine(frame_callback=frame_handler)
+if __name__ == '__main__':
+    model = init_model()
 
-WebServer.run()
+    if model:
+        OpenCVRoutine(frame_callback=frame_handler)
+        WebServer.run()

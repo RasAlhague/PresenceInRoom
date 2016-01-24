@@ -13,7 +13,117 @@
       "input_dim": null,
       "b_regularizer": null,
       "W_regularizer": null,
-      "output_dim": 1428
+      "output_dim": 1071
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1071
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1071
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1071
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1071
+    },
+    {
+      "beta": 0.1,
+      "activation": "relu",
+      "name": "Activation",
+      "target": 0
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "b_constraint": null,
+      "name": "Dense",
+      "activity_regularizer": null,
+      "W_constraint": null,
+      "init": "glorot_uniform",
+      "activation": "linear",
+      "input_dim": null,
+      "b_regularizer": null,
+      "W_regularizer": null,
+      "output_dim": 1071
     },
     {
       "beta": 0.1,
