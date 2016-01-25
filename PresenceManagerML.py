@@ -6,7 +6,6 @@ from threading import Timer, Thread
 import requests
 
 import WebServer
-from ComparisonPlot import ComparisonPlot
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
@@ -153,6 +152,7 @@ def init_model():
         if "--model-from-file" in sys.argv:
             global xy_queue, comparison
             xy_queue = Queue()
+            from ComparisonPlot import ComparisonPlot
             comparison = ComparisonPlot(xy_queue)
             return dict(svm=load_svm_model(), nn=load_nn_model())
 
