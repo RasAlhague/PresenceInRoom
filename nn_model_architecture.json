@@ -1,25 +1,22 @@
 {
   "layers": [
     {
-      "b_constraint": null,
-      "name": "Dense",
-      "activity_regularizer": null,
-      "W_constraint": null,
+      "name": "LSTM",
+      "inner_activation": "hard_sigmoid",
+      "go_backwards": false,
+      "output_dim": 1071,
       "input_shape": [
+        1,
         357
       ],
-      "init": "he_normal",
-      "activation": "linear",
-      "input_dim": null,
-      "b_regularizer": null,
-      "W_regularizer": null,
-      "output_dim": 1785
-    },
-    {
-      "beta": 0.1,
-      "activation": "relu",
-      "name": "Activation",
-      "target": 0
+      "stateful": false,
+      "init": "glorot_uniform",
+      "inner_init": "orthogonal",
+      "input_dim": 357,
+      "return_sequences": false,
+      "activation": "tanh",
+      "forget_bias_init": "one",
+      "input_length": null
     },
     {
       "p": 0.2,

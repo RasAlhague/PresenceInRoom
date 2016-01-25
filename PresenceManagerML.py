@@ -9,6 +9,7 @@ import WebServer
 from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
+from KerasNNModel import lstm_model
 from OpenCVRoutine import OpenCVRoutine
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import create_dataset, prepare_image_for_nn
@@ -62,8 +63,8 @@ def load_svm_model():
 
 
 def load_nn_model():
-    from keras.models import model_from_json
-    model = model_from_json(open(nn_model_file_name).read())
+    # model = model_from_json(open(nn_model_file_name).read())
+    model = lstm_model()
     model.load_weights(nn_model_weights)
     return model
 
@@ -90,7 +91,7 @@ def predict_nn(gray_frame):
     if model.__class__ is dict:
         temp_model = model['nn']
 
-    ndim_vector = prepare_image_for_nn(gray_frame)
+    ndim_vector = prepare_image_for_nn(gray_frame).reshape(1, 1, 357)
     # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
 
     predicted = temp_model.predict_classes(ndim_vector)
@@ -142,11 +143,11 @@ def init_model():
             return model
 
     elif "-nn" in sys.argv:
-        from KerasNNModel import train, mlp_model
+        from KerasNNModel import train
         if "--model-from-file" in sys.argv:
             return load_nn_model()
         elif "--model-from-file" not in sys.argv:
-            return train(mlp_model())[0]
+            return train(lstm_model())[0]
 
     elif "--comparison" in sys.argv:
         if "--model-from-file" in sys.argv:

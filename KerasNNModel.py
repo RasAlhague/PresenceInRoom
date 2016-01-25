@@ -67,8 +67,8 @@ def mlp_model():
 
 def lstm_model():
     model = Sequential()
-    model.add(LSTM(output_dim=128, input_shape=(n_features, 0)))
-    model.add(Dropout(0.5))
+    model.add(LSTM(output_dim=n_hidden_layer_neurons, input_shape=(1, 357)))
+    model.add(Dropout(0.2))
     model.add(Dense(n_classes))
     model.add(Activation('softmax'))
 
@@ -102,9 +102,9 @@ def train(model):
     # for i in range(0, X_train.shape[0]):
     #     print model.train_on_batch(X_train[i].reshape(1, 1, 22, 18), [Y_train[i]], accuracy=True)
 
-    model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=128, show_accuracy=True,
+    model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=batch_size, show_accuracy=True,
               validation_data=(X_train, Y_train))
-    model_evaluation_score = model.evaluate(X_train, Y_train, batch_size=128)
+    model_evaluation_score = model.evaluate(X_train, Y_train, batch_size=batch_size)
     print model_evaluation_score
 
     json_string = model.to_json()
@@ -119,11 +119,12 @@ def train(model):
 activation_f = 'tanh'
 init_method = 'he_normal'
 n_features = nn_image_size[0] * nn_image_size[1]
-n_hidden_layer_neurons = n_features * 5
+n_hidden_layer_neurons = n_features * 3
 n_classes = 2
 nb_epoch = 150
 nb_hidden_layers = 0
 dropout = 0.2
+batch_size = 128
 
 if __name__ == '__main__':
     def plot_result():
