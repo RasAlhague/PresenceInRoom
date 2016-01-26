@@ -18,6 +18,8 @@ class DimensionalityReduction:
             Process(target=self.plot_LDA).start()
 
     def plot_PCA(self):
+        import matplotlib
+        matplotlib.use('WXAgg')
         import matplotlib.pyplot as plt
 
         pca = PCA(n_components=5)
@@ -38,6 +40,8 @@ class DimensionalityReduction:
         plt.show()
 
     def plot_LDA(self):
+        import matplotlib
+        matplotlib.use('WXAgg')
         import matplotlib.pyplot as plt
 
         lda = LinearDiscriminantAnalysis(n_components=1)
