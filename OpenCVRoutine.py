@@ -1,24 +1,20 @@
 from datetime import datetime
-from multiprocessing import Process
+from threading import Thread
 
 from PIL import Image
 
 from Constants import *
 
-record_mode = 0
 
+class OpenCVRoutine(Thread):
+    record_mode = 0
 
-def set_rm(rm):
-    global record_mode
-    record_mode = rm
-
-
-class OpenCVRoutine(Process):
     def __init__(self, frame_queue):
         super(OpenCVRoutine, self).__init__()
 
         self.frame_queue = frame_queue
 
+        self.setDaemon(True)
         self.start()
 
     def run(self):
@@ -46,12 +42,12 @@ class OpenCVRoutine(Process):
                 if key == ord('q'):
                     break
 
-                if key == ord('2') or record_mode == 2:
+                if key == ord('2') or OpenCVRoutine.record_mode == 2:
                     Image.fromarray(bgr_frame).save(
                             learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg",
                             "JPEG")
 
-                if key == ord('1') or record_mode == 1:
+                if key == ord('1') or OpenCVRoutine.record_mode == 1:
                     Image.fromarray(bgr_frame).save(
                             learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
                             "JPEG")
