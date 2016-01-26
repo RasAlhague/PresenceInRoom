@@ -3,6 +3,7 @@ import time
 from multiprocessing import Queue
 from threading import Timer, Thread
 
+import numpy
 import requests
 
 import WebServer
@@ -111,6 +112,8 @@ def init_model():
         else:
             dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, image_size,
                                      img_layers=1)
+
+            numpy.random.shuffle(dataset)
 
             X = dataset[:, 0:-1]
             y = dataset[:, -1]

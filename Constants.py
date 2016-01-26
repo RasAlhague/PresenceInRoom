@@ -31,7 +31,7 @@ platform_architecture = platform.uname()[4]
 show_preview = False if platform_architecture == "armv7l" else True
 
 real_image_size = 352, 288
-image_scale_factor = (0.125, 0.125)
+image_scale_factor = (0.2, 0.2)
 nn_image_scale_factor = (0.06, 0.06)
 image_size = (int(round(real_image_size[0] * image_scale_factor[0])),
               int(round(real_image_size[1] * image_scale_factor[1])))
