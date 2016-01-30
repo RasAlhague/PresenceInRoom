@@ -198,5 +198,9 @@ if __name__ == '__main__':
 
     if model:
         OpenCVRoutine(frame_queue)
-        Thread(target=frame_handler, args=(frame_queue,)).start()
+
+        frame_handler_thread = Thread(target=frame_handler, args=(frame_queue,))
+        frame_handler_thread.setDaemon(True)
+        frame_handler_thread.start()
+
         WebServer.run()

@@ -72,6 +72,9 @@ class MotionDetectorAdaptative():
 
             currentframe = cv2.resize(currentframe, (int(self.width / self.resolutionDivider),
                                                      int(self.height / self.resolutionDivider)))
+            currentframe = cv2.cvtColor(currentframe, cv2.COLOR_BGR2GRAY)
+            currentframe = cv2.equalizeHist(currentframe)
+
             self.processImage(currentframe)  # Process the image
 
             contourSurface = self.calculateContourSurface()
@@ -122,20 +125,20 @@ class MotionDetectorAdaptative():
         cv2.convertScaleAbs(self.average_frame, self.previous_frame)  # moving_average - curframe
 
         if self.show:
-            cv2.imshow("AVG", self.average_frame)
+            cv2.imshow("AVG", self.previous_frame)
 
         cv2.absdiff(curframe, self.previous_frame, self.absdiff_frame)  # moving_average - curframe
 
         if self.show:
             cv2.imshow("AbsDiff", self.absdiff_frame)
 
-        self.gray_frame = cv2.cvtColor(self.absdiff_frame,
-                                       cv2.COLOR_RGB2GRAY)  # Convert to gray otherwise can't do threshold
+        # self.gray_frame = cv2.cvtColor(self.absdiff_frame,
+        #                                cv2.COLOR_RGB2GRAY)  # Convert to gray otherwise can't do threshold
+        #
+        # if self.show:
+        #     cv2.imshow("gray_frame diff", self.gray_frame)
 
-        if self.show:
-            cv2.imshow("gray_frame", self.gray_frame)
-
-        cv2.threshold(self.gray_frame, self.activationThreshold, 255, cv2.THRESH_BINARY, self.gray_frame)
+        _, self.gray_frame = cv2.threshold(self.absdiff_frame, self.activationThreshold, 255, cv2.THRESH_BINARY)
 
         if self.show:
             cv2.imshow("Threshold", self.gray_frame)

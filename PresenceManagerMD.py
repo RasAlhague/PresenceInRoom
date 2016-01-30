@@ -2,18 +2,15 @@ from threading import Timer
 
 import requests
 
-from Constants import relay_address, capture_url, gpio_to_switch, platform_architecture
+from Constants import relay_address, gpio_to_switch, platform_architecture, after_low_timer_delay, \
+    timer_delay, after_low_timer, capture_url
 from MotionDetectorContours import MotionDetectorAdaptative
 from SendPostAsync import SendPostAsync
 
 timer = None
-timer_delay = 3
 
-after_low_timer = None
-after_low_timer_delay = 3
-
-running_avg_alpha = 0.03
-slow_running_avg_alpha = 0.005
+running_avg_alpha = 0.01
+slow_running_avg_alpha = 0
 
 
 def pass_f():
@@ -27,7 +24,6 @@ def send_post(to):
 def set_low(_relay_address):
     send_post(_relay_address + "/gpio/" + str(gpio_to_switch) + "/low")
 
-    global after_low_timer
     after_low_timer = Timer(after_low_timer_delay, pass_f, ())
     after_low_timer.start()
 
@@ -51,12 +47,13 @@ def on_detect():
         timer.start()
 
 
-platform_architecture = "armv7l"
+# platform_architecture = "armv7l"
 detect = MotionDetectorAdaptative(detectionThreshold=6,
                                   runningAvgAlpha=running_avg_alpha,
                                   ignoreThresholdBiggerThan=60,
                                   onDetectCallback=on_detect,
                                   captureURL=capture_url,
+                                  # captureURL=0,
                                   activationThreshold=30,
                                   showWindows=False if platform_architecture == "armv7l" else True,
                                   resolutionDivider=2 if platform_architecture == "armv7l" else 1,
