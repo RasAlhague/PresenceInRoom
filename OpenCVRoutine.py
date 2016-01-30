@@ -23,7 +23,11 @@ class OpenCVRoutine(Thread):
     def opencv_routine(self):
         try:
             cap = cv2.VideoCapture(capture_url)
-            while True:
+            import threading
+            is_main_thread_active = lambda: any(
+                    (i.name == "MainThread") and i.is_alive() for i in threading.enumerate())
+
+            while is_main_thread_active():
                 # Capture frame-by-frame
                 ret, bgr_frame = cap.read()
 
