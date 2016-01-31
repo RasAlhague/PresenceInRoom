@@ -56,9 +56,13 @@ class OpenCVRoutine(Thread):
                             learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg",
                             "JPEG")
 
-            # When everything done, release the capture
-            cap.release()
-            cv2.destroyAllWindows()
         except Exception as e:
-            print(e)
-            self.opencv_routine()
+            print e
+            print 'Restarting cv routine'
+
+            # When everything done, release the capture
+            if cap:
+                cap.release()
+            cv2.destroyAllWindows()
+
+            OpenCVRoutine(self.frame_queue)
