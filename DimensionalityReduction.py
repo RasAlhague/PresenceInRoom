@@ -48,9 +48,10 @@ class DimensionalityReduction:
         X_r2 = lda.fit_transform(self.X, self.y)
 
         plt.figure()
-        for c, i, target_name in zip("rg", [0, 1], ["x", "y"]):
+        for c, i, target_name, s in zip("rg", [0, 1], ["x", "y"], [2, 20]):
+            # for c, i, target_name in zip("r", [0], ["x"]):
             x_r2 = X_r2[self.y == i, 0]
-            plt.scatter(x_r2, numpy.zeros(x_r2.__len__()), c=c, label=target_name)
+            plt.scatter(x_r2, numpy.zeros(x_r2.__len__()), c=c, label=target_name, s=s)
 
         plt.legend()
         plt.title('LDA')
