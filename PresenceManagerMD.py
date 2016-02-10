@@ -10,7 +10,7 @@ from SendPostAsync import SendPostAsync
 timer = None
 
 running_avg_alpha = 0.01
-slow_running_avg_alpha = 0.003
+slow_running_avg_alpha = 0.005
 
 
 def pass_f():

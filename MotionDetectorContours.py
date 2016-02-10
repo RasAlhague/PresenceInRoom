@@ -143,6 +143,11 @@ class MotionDetectorAdaptative():
         if self.show:
             cv2.imshow("Threshold", self.gray_frame)
 
+        self.gray_frame = cv2.erode(self.gray_frame, None, iterations=1)
+
+        if self.show:
+            cv2.imshow("Erode1", self.gray_frame)
+
         self.gray_frame = cv2.dilate(self.gray_frame, None, iterations=5)  # to get object blobs
 
         if self.show:
@@ -151,7 +156,7 @@ class MotionDetectorAdaptative():
         self.gray_frame = cv2.erode(self.gray_frame, None, iterations=3)
 
         if self.show:
-            cv2.imshow("Erode", self.gray_frame)
+            cv2.imshow("Erode2", self.gray_frame)
 
     def somethingHasMoved(self, contourSurface):
         if self.detectionThreshold < contourSurface < self.ignoreThresholdBiggerThan:
