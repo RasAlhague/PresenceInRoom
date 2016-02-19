@@ -37,3 +37,6 @@ image_size = (int(round(real_image_size[0] * image_scale_factor[0])),
               int(round(real_image_size[1] * image_scale_factor[1])))
 nn_image_size = (int(round(real_image_size[0] * nn_image_scale_factor[0])),
                  int(round(real_image_size[1] * nn_image_scale_factor[1])))
+
+schedule_for_opencv_routine = ("0 0 17 1/1 * ? *", "0 0 7 1/1 * ? *")
+# schedule_for_opencv_routine = ("0 43 22 1/1 * ? *", "10 43 22 1/1 * ? *")

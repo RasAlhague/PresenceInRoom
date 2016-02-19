@@ -13,7 +13,7 @@ class OpenCVRoutine(Thread):
         super(OpenCVRoutine, self).__init__()
 
         self.frame_queue = frame_queue
-        self.stop_routine = False
+        self.is_running = True
 
         self.setDaemon(True)
         self.start()
@@ -22,7 +22,7 @@ class OpenCVRoutine(Thread):
         self.opencv_routine()
 
     def stop_routine(self):
-        self.stop_routine = True
+        self.is_running = False
 
     def opencv_routine(self):
         try:
@@ -31,7 +31,7 @@ class OpenCVRoutine(Thread):
             is_main_thread_active = lambda: any(
                 (i.name == "MainThread") and i.is_alive() for i in threading.enumerate())
 
-            while is_main_thread_active() or not self.stop_routine:
+            while is_main_thread_active() and self.is_running:
                 # Capture frame-by-frame
                 ret, bgr_frame = cap.read()
 

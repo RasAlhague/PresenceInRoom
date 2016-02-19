@@ -11,7 +11,7 @@ from Constants import *
 from Constants import relay_address, gpio_to_switch
 from DimensionalityReduction import DimensionalityReduction
 from KerasNNModel import lstm_model
-from OpenCVRoutine import OpenCVRoutine
+from OpenCVRoutineManager import OpenCVRoutineManager
 from SendPostAsync import SendPostAsync
 from images_to_ndim_vector import create_dataset, prepare_image_for_nn
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     frame_queue = Queue()
 
     if model:
-        OpenCVRoutine(frame_queue)
+        OpenCVRoutineManager(schedule_for_opencv_routine, frame_queue)
 
         frame_handler_thread = Thread(target=frame_handler, args=(frame_queue,))
         frame_handler_thread.setDaemon(True)
