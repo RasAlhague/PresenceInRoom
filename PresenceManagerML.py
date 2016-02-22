@@ -197,7 +197,7 @@ if __name__ == '__main__':
     frame_queue = Queue()
 
     if model:
-        OpenCVRoutineManager(schedule_for_opencv_routine, frame_queue)
+        OpenCVRoutineManager(opencv_routine_schedule, frame_queue)
 
         frame_handler_thread = Thread(target=frame_handler, args=(frame_queue,))
         frame_handler_thread.setDaemon(True)
