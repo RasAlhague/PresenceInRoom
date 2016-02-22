@@ -22,6 +22,7 @@ class OpenCVRoutine(Thread):
         self.opencv_routine()
 
     def stop_routine(self):
+        print 'Stopping OpenCVRoutine'
         self.is_running = False
 
     def opencv_routine(self):
