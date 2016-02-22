@@ -23,7 +23,7 @@ stream_quality = 1
 
 capture_url = "rtsp://192.168.1.51:554/user=admin&password=&channel=1&stream=" + \
               str(stream_quality) + \
-              ".sdp?real_stream--rtp-caching=100"
+              ".sdp?real_stream--rtp-caching=0"
 
 gpio_to_switch = 6
 
