@@ -49,7 +49,7 @@ class OpenCVRoutineManager(Thread):
             if start_dt <= datetime.datetime.now() <= stop_dt:
                 if self.open_cv_routine is None:
                     self.open_cv_routine = OpenCVRoutine(self.frame_queue)
-            else:
+            elif self.open_cv_routine is not None:
                 self.open_cv_routine.stop_routine()
                 self.open_cv_routine = None
 
