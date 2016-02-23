@@ -1,3 +1,4 @@
+import datetime
 import sys
 import time
 from multiprocessing import Queue
@@ -164,6 +165,7 @@ def init_model():
 def frame_handler(frame_queue):
     predicted = None
     _predict_proba = None
+    last_prediction = None
 
     while True:
         gray_frame = frame_queue.get()
@@ -183,13 +185,18 @@ def frame_handler(frame_queue):
             xy_queue.put(([current_milli_time(), current_milli_time()],
                           [_predict_proba_nn[0][1], _predict_proba[0][1]]))
 
-        print predicted, "\t", _predict_proba
+        if "--verbose" in sys.argv:
+            print str(datetime.datetime.now().time()), "\t", predicted, "\t", _predict_proba
+        elif last_prediction != predicted:
+            print str(datetime.datetime.now().time()), "\t", predicted, "\t", _predict_proba
 
         if predicted[0] == 0:
             cv2.putText(gray_frame, "0", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
         if predicted[0] == 1:
             cv2.putText(gray_frame, "1", (20, 30), cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 1, 0)
             on_detect()
+
+        last_prediction = predicted
 
 
 if __name__ == '__main__':
