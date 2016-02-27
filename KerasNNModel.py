@@ -1,16 +1,16 @@
 import cPickle as pickle
 from multiprocessing import Process
 
+import numpy
 from keras.layers.convolutional import Convolution2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.core import Dense, Activation, Dropout, Flatten
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential
 from keras.optimizers import RMSprop
-from keras.utils import np_utils
 
 from Constants import *
-from images_to_ndim_vector import create_dataset, prepare_image_for_nn
+from images_to_ndim_vector import prepare_image_for_nn, create_dataset_nn
 
 
 def conv_model():
@@ -67,7 +67,9 @@ def mlp_model():
 
 def lstm_model():
     model = Sequential()
-    model.add(LSTM(output_dim=n_hidden_layer_neurons, input_shape=(1, 357)))
+    model.add(LSTM(output_dim=n_hidden_layer_neurons, return_sequences=True, input_shape=(1, nn_image_vector_size)))
+    model.add(Dropout(0.2))
+    model.add(LSTM(output_dim=n_hidden_layer_neurons, return_sequences=False))
     model.add(Dropout(0.2))
     model.add(Dense(n_classes))
     model.add(Activation('softmax'))
@@ -77,16 +79,8 @@ def lstm_model():
 
 
 def train(model):
-    dataset = create_dataset(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size, img_layers=1)
-
-    X_train = dataset[:, 0:-1]
-    Y_train = dataset[:, -1]
-
-    X_train = X_train.astype('float32')
-    X_train /= 255
-
-    # convert class vectors to binary class matrices
-    Y_train = np_utils.to_categorical(Y_train, n_classes)
+    X_train, Y_train = create_dataset_nn(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size,
+                                         img_layers=1)
 
     # model = conv_model()
     # inpush_shape = (X_train.shape[0], 1, nn_image_size[0], nn_image_size[1])
@@ -102,7 +96,16 @@ def train(model):
     # for i in range(0, X_train.shape[0]):
     #     print model.train_on_batch(X_train[i].reshape(1, 1, 22, 18), [Y_train[i]], accuracy=True)
 
-    model.fit(X_train, Y_train, nb_epoch=nb_epoch, batch_size=batch_size, show_accuracy=True,
+    # X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_train = numpy.load(open(nn_x_path))
+    Y_train = numpy.load(open(nn_y_path))
+    # X_train = X_train[0:9850].reshape((394, 25, nn_image_vector_size))
+    # Y_train = Y_train[0:9850]
+    model.fit(X_train,
+              Y_train,
+              nb_epoch=nb_epoch,
+              batch_size=batch_size,
+              show_accuracy=True,
               validation_data=(X_train, Y_train))
     model_evaluation_score = model.evaluate(X_train, Y_train, batch_size=batch_size)
     print model_evaluation_score
@@ -121,7 +124,7 @@ init_method = 'he_normal'
 n_features = nn_image_size[0] * nn_image_size[1]
 n_hidden_layer_neurons = n_features * 3
 n_classes = 2
-nb_epoch = 150
+nb_epoch = 25
 nb_hidden_layers = 0
 dropout = 0.2
 batch_size = 128
