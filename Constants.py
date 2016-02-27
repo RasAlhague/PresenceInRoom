@@ -4,7 +4,7 @@ import cv2
 
 # nn_model_file_name = 'nn_model_architecture.json'
 # nn_model_weights = 'nn_model_weights.h5'
-nn_path = '16.02.27 1228 10694 lstm(1, 357)/'
+nn_path = '16.02.27 10948 lstm(1, 357)/'
 nn_model_file_name = nn_path + 'nn_model_architecture.json'
 nn_model_weights = nn_path + 'nn_model_weights.h5'
 nn_x_path = nn_path + 'X_train'
