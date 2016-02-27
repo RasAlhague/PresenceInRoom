@@ -14,7 +14,7 @@ from DimensionalityReduction import DimensionalityReduction
 from KerasNNModel import lstm_model
 from OpenCVRoutineManager import OpenCVRoutineManager
 from SendPostAsync import SendPostAsync
-from images_to_ndim_vector import create_dataset, prepare_image_for_nn
+from images_to_ndim_vector import create_dataset, prepare_image_for_nn, create_dataset_nn
 
 
 def current_milli_time():
@@ -86,15 +86,12 @@ def predict_svm(gray_frame):
     return predicted, _predict_proba
 
 
-def predict_nn(gray_frame):
+def predict_nn(ndim_vector):
     # NN predict time: 0.00577807426453
 
     temp_model = model
     if model.__class__ is dict:
         temp_model = model['nn']
-
-    ndim_vector = prepare_image_for_nn(gray_frame).reshape(1, 1, 357)
-    # ndim_vector = ndim_vector.reshape(1, 1, 22, 18)
 
     predicted = temp_model.predict_classes(ndim_vector)
     _predict_proba = temp_model.predict(ndim_vector)
@@ -167,11 +164,30 @@ def frame_handler(frame_queue):
     _predict_proba = None
     last_prediction = None
 
+    X_train, Y_train = create_dataset_nn(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size,
+                                         img_layers=1)
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_train_l = X_train.shape[0]
+    buffer_size = 200
+
     while True:
         gray_frame = frame_queue.get()
 
         if "-nn" in sys.argv:
-            predicted, _predict_proba = predict_nn(gray_frame)
+            ndim_vector = prepare_image_for_nn(gray_frame).reshape(1, 1, nn_image_vector_size)
+            predicted, _predict_proba = predict_nn(ndim_vector)
+
+            if WebServer.record_mode != 0:
+                X_train = numpy.append(X_train, ndim_vector, axis=0)
+            if WebServer.record_mode == 1:
+                Y_train = numpy.append(Y_train, [[0, 1]], axis=0)
+            if WebServer.record_mode == 2:
+                Y_train = numpy.append(Y_train, [[1, 0]], axis=0)
+
+            if X_train.shape[0] == X_train_l + buffer_size:
+                model.train_on_batch(X_train, Y_train)
+                print model.evaluate(X_train, Y_train)
+                X_train_l = X_train.shape[0]
 
         elif "-svm" in sys.argv:
             predicted, _predict_proba = predict_svm(gray_frame)
