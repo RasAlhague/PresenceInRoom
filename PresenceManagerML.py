@@ -14,7 +14,7 @@ from DimensionalityReduction import DimensionalityReduction
 from KerasNNModel import lstm_model
 from OpenCVRoutineManager import OpenCVRoutineManager
 from SendPostAsync import SendPostAsync
-from images_to_ndim_vector import create_dataset, prepare_image_for_nn, create_dataset_nn
+from images_to_ndim_vector import create_dataset, prepare_image_for_nn
 
 
 def current_milli_time():
@@ -164,11 +164,13 @@ def frame_handler(frame_queue):
     _predict_proba = None
     last_prediction = None
 
-    X_train, Y_train = create_dataset_nn(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size,
-                                         img_layers=1)
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    # X_train, Y_train = create_dataset_nn(learning_set_path, {absence_prefix: 0, presence_prefix: 1}, nn_image_size,
+    #                                      img_layers=1)
+    # X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_train = numpy.load(open(nn_x_path))
+    Y_train = numpy.load(open(nn_y_path))
     X_train_l = X_train.shape[0]
-    buffer_size = 200
+    buffer_size = 100
 
     while True:
         gray_frame = frame_queue.get()
