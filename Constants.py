@@ -2,8 +2,13 @@ import platform
 
 import cv2
 
-nn_model_file_name = 'nn_model_architecture.json'
-nn_model_weights = 'nn_model_weights.h5'
+# nn_model_file_name = 'nn_model_architecture.json'
+# nn_model_weights = 'nn_model_weights.h5'
+nn_path = '16.02.27 1228 10694 lstm(1, 357)/'
+nn_model_file_name = nn_path + 'nn_model_architecture.json'
+nn_model_weights = nn_path + 'nn_model_weights.h5'
+nn_x_path = nn_path + 'X_train'
+nn_y_path = nn_path + 'Y_train'
 
 learning_set_path = "Learning Set/"
 absence_prefix = "Abs"
@@ -37,6 +42,7 @@ image_size = (int(round(real_image_size[0] * image_scale_factor[0])),
               int(round(real_image_size[1] * image_scale_factor[1])))
 nn_image_size = (int(round(real_image_size[0] * nn_image_scale_factor[0])),
                  int(round(real_image_size[1] * nn_image_scale_factor[1])))
+nn_image_vector_size = nn_image_size[0] * nn_image_size[1]
 
 # opencv_routine_schedule = {
 #     'format': '%H %M %S',
