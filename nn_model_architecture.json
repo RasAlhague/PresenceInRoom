@@ -13,6 +13,24 @@
       "init": "glorot_uniform",
       "inner_init": "orthogonal",
       "input_dim": 357,
+      "return_sequences": true,
+      "activation": "tanh",
+      "forget_bias_init": "one",
+      "input_length": null
+    },
+    {
+      "p": 0.2,
+      "name": "Dropout"
+    },
+    {
+      "name": "LSTM",
+      "inner_activation": "hard_sigmoid",
+      "go_backwards": false,
+      "output_dim": 1071,
+      "stateful": false,
+      "init": "glorot_uniform",
+      "inner_init": "orthogonal",
+      "input_dim": 1071,
       "return_sequences": false,
       "activation": "tanh",
       "forget_bias_init": "one",
