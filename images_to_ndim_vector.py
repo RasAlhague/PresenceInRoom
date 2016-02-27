@@ -3,6 +3,7 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
+from keras.utils import np_utils
 
 from Constants import nn_image_scale_factor
 
@@ -24,6 +25,22 @@ def create_dataset(images_folder, prefix_to_label, image_size, img_layers=3):
             ndim_vector[i] = np.append(im, [prefix_to_label[file_prefix]]).reshape(1, -1)
             i += 1
     return ndim_vector
+
+
+def create_dataset_nn(images_folder, prefix_to_label, image_size, img_layers=3):
+    dataset = create_dataset(images_folder, prefix_to_label, image_size, img_layers)
+
+    X_train = dataset[:, 0:-1]
+    Y_train = dataset[:, -1]
+
+    X_train = X_train.astype('float32')
+    X_train /= 255
+
+    # convert class vectors to binary class matrices
+    from KerasNNModel import n_classes
+    Y_train = np_utils.to_categorical(Y_train, n_classes)
+
+    return X_train, Y_train
 
 
 def image_path_to_ndim_vector(image_path, image_size):
