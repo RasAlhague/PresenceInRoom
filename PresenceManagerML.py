@@ -82,6 +82,8 @@ def predict_svm(gray_frame):
     predicted = temp_model.predict(ndim_vector)
     if temp_model.get_params()['probability']:
         _predict_proba = temp_model._predict_proba(ndim_vector)
+    else:
+        _predict_proba = None
 
     return predicted, _predict_proba
 
