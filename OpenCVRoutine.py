@@ -1,4 +1,7 @@
+from datetime import datetime
 from threading import Thread
+
+from PIL import Image
 
 from Constants import *
 
@@ -48,13 +51,13 @@ class OpenCVRoutine(Thread):
                 if key == ord('q'):
                     break
 
-                # if key == ord('2') or OpenCVRoutine.record_mode == 2:
-                #     Image.fromarray(bgr_frame).save(
-                #         learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg", "JPEG")
-                #
-                # if key == ord('1') or OpenCVRoutine.record_mode == 1:
-                #     Image.fromarray(bgr_frame).save(
-                #         learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg", "JPEG")
+                if key == ord('2') or OpenCVRoutine.record_mode == 2:
+                    Image.fromarray(bgr_frame).save(
+                        learning_set_path + absence_prefix + "_" + str(datetime.now().time()) + ".jpg", "JPEG")
+
+                if key == ord('1') or OpenCVRoutine.record_mode == 1:
+                    Image.fromarray(bgr_frame).save(
+                        learning_set_path + presence_prefix + "_" + str(datetime.now().time()) + ".jpg", "JPEG")
 
             # When everything done, release the capture
             if cap:
